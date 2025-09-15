@@ -30,9 +30,10 @@ init: stop ## Initialize project and set GATEWAY_PEER in .env
 	ADDR=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '.multiaddrs[0]'); \
 	GATEWAY_PEER="$${ADDR}/p2p/$${PEER_ID}"; \
 	echo "Discovered GATEWAY_PEER=$${GATEWAY_PEER}"; \
-	sed -i '' '/^GATEWAY_PEER=/d' ${ENV_FILE}; \
-	sed -i '' '/^ADDR=/d' ${ENV_FILE}; \
-	sed -i '' '/^PEER_ID=/d' ${ENV_FILE}; \
+	sed -i.bak '/^GATEWAY_PEER=/d' "${ENV_FILE}"
+	sed -i.bak '/^ADDR=/d' "${ENV_FILE}"
+	sed -i.bak '/^PEER_ID=/d' "${ENV_FILE}"
+	rm -f "${ENV_FILE}.bak"
 	echo "GATEWAY_PEER=$${GATEWAY_PEER}" >> ${ENV_FILE}; \
 	echo "ADDR=$${ADDR}" >> ${ENV_FILE}; \
 	echo "PEER_ID=$${PEER_ID}" >> ${ENV_FILE}; \
@@ -63,11 +64,11 @@ run: stop ## Run full stack with Geth + Prysm + monitoring
 	docker compose --profile full --profile geth --profile prysm up --build -d
 
 run_teku: stop ## Run full stack with Nethermind + Teku + monitoring
-	@echo "Running ${PROJECT_NAME} (Geth + Teku + Monitoring)..."
+	@echo "Running ${PROJECT_NAME} (Nethermind + Teku + Monitoring)..."
 	docker compose --profile full --profile nethermind --profile teku up --build -d
 
 run_lighthouse: stop ## Run full stack with Nethermind + Lighthouse + monitoring
-	@echo "Running ${PROJECT_NAME} (Geth + Lighthouse + Monitoring)..."
+	@echo "Running ${PROJECT_NAME} (Nethermind + Lighthouse + Monitoring)..."
 	docker compose --profile full --profile nethermind --profile lighthouse up --build -d
 
 run_prysm: stop ## Run full stack with Nethermind + Prysm + monitoring

@@ -196,7 +196,7 @@ services:
   # Prometheus metrics collector
   prometheus:
     image: prom/prometheus:latest
-    profiles: ["lite", "full"]  # enabled with either profilel
+    profiles: ["lite", "full"]  # enabled with either profile
     volumes:
       - ../grafana/prometheus:/etc/prometheus  # Prometheus config
       - prometheus-data:/prometheus            # Persist TSDB data

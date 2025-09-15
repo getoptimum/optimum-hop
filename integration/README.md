@@ -12,7 +12,7 @@ This will:
 * Generate a jwt.hex for EL ↔ CL authentication.
 * Start the Optimum Gateway and fetch its peer info.
 * Write to .env:
-
+NOTE: need to configure app_config.yml (example in sample.app_config.yml)
 ```sh
 GATEWAY_PEER=/ip4/99.97.0.2/tcp/33212/p2p/16Uiu2HAm...
 ADDR=/ip4/99.97.0.2/tcp/33212
@@ -72,8 +72,8 @@ docker compose --profile lite up -d
 
 * Only one EL profile should be active at a time (geth or nethermind).
 * Only one CL profile should be active at a time (prysm, teku, or lighthouse).
-* ADDR and PEER_ID are derived automatically from the Gateway during make init.
-* If you run into sync issues, try make reset to wipe state and re-init.
+* GATEWAY_PEER, ADDR and PEER_ID are populated automatically from the Gateway during `make init`.
+* If you run into sync issues, try `make reset` to wipe state and re-init.
 
 ### Known Issues
 
