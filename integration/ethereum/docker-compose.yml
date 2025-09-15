@@ -7,7 +7,7 @@ services:
     image: getoptimum/gateway:${GATEWAY_VERSION}   # Use version from env var
     container_name: optimum-gateway
     restart: unless-stopped
-    profiles: ["lite"] 
+    profiles: ["lite", "teku", "prysm", "lighthouse"]
     ports:
       - "33212:33212"         # libp2p port
       - "33213:33213"         # OptimumP2P port
@@ -18,7 +18,9 @@ services:
       - ./identity/optp2p:/tmp/optp2p  # Persistent OptimumP2P identity
     command: ["-config=/app/config/app_conf.yml"]  # Explicit config path
     networks:
-      - hop-hoodi-testnet
+      hop-hoodi-testnet:
+        ipv4_address: 172.29.0.16
+
   # ========================================================
   # Execution Layer (EL) - choose either geth OR nethermind
   # Activated using --profile geth or --profile nethermind
@@ -254,3 +256,6 @@ volumes:
 networks:
   hop-hoodi-testnet:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.29.0.0/16
