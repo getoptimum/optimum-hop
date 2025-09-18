@@ -7,5 +7,4 @@ It’s the quickest way to experiment with **mumP2P** without manual setup.
 
 ## Integrations
 
-* Ethereum See [./integration/README.md](./integration/README.md)
-
+* Ethereum [./integration/README.md](./integration/README.md)
