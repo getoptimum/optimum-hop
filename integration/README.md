@@ -1,4 +1,4 @@
-# Optimum Hop
+# Optimum Gateway Integration
 
 ## Setup
 
@@ -13,6 +13,7 @@ This will:
 * Start the Optimum Gateway and fetch its peer info.
 * Write to .env:
 NOTE: need to configure app_config.yml (example in sample.app_config.yml)
+
 ```sh
 GATEWAY_PEER=/ip4/99.97.0.2/tcp/33212/p2p/16Uiu2HAm...
 ADDR=/ip4/99.97.0.2/tcp/33212
