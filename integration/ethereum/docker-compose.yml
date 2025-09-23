@@ -166,6 +166,7 @@ services:
     ports:
       - 9000:9000/tcp # P2P TCP
       - 9000:9000/udp # P2P UDP
+      - 5052:5052   # HTTP API
     command: |
       lighthouse bn
       --network=hoodi

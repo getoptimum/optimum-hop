@@ -5,6 +5,7 @@ PRYSM_DATA_DIR := ${PWD}/hop-hoodi/prysm-data
 JWT_SECRET_FILE := ${PWD}/hop-hoodi/jwt.hex
 ENV_FILE := .env
 ENV_EXAMPLE := .env.example
+PLATFORM := linux/arm64
 
 help: ## Show help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -23,21 +24,24 @@ init: stop ## Initialize project and set GATEWAY_PEER in .env
 		cp ${ENV_EXAMPLE} ${ENV_FILE}; \
 	fi
 	@echo "Starting gateway container to fetch peer info..."
-	@docker compose up -d optimum-gateway
+	@DOCKER_DEFAULT_PLATFORM=${PLATFORM} docker compose up -d --build optimum-gateway
 	@echo "Waiting for gateway API..."
 	@sleep 5
-	@PEER_ID=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '.peer_id'); \
-	ADDR=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '.multiaddrs[0]'); \
-	GATEWAY_PEER="$${ADDR}/p2p/$${PEER_ID}"; \
-	echo "Discovered GATEWAY_PEER=$${GATEWAY_PEER}"; \
-	sed -i.bak '/^GATEWAY_PEER=/d' "${ENV_FILE}"
-	sed -i.bak '/^ADDR=/d' "${ENV_FILE}"
-	sed -i.bak '/^PEER_ID=/d' "${ENV_FILE}"
-	rm -f "${ENV_FILE}.bak"
-	echo "GATEWAY_PEER=$${GATEWAY_PEER}" >> ${ENV_FILE}; \
-	echo "ADDR=$${ADDR}" >> ${ENV_FILE}; \
-	echo "PEER_ID=$${PEER_ID}" >> ${ENV_FILE}; \
-	echo "Updated ${ENV_FILE} with gateway peer"
+		@( \
+		PEER_ID=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '.peer_id'); \
+		ADDR=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '.multiaddrs[0]'); \
+		GATEWAY_PEER="$${ADDR}/p2p/$${PEER_ID}"; \
+		echo "Discovered GATEWAY_PEER=$${GATEWAY_PEER}"; \
+		sed -i.bak '/^GATEWAY_PEER=/d' "${ENV_FILE}"; \
+		sed -i.bak '/^ADDR=/d' "${ENV_FILE}"; \
+		sed -i.bak '/^PEER_ID=/d' "${ENV_FILE}"; \
+		rm -f "${ENV_FILE}.bak"; \
+		echo "GATEWAY_PEER=$${GATEWAY_PEER}" >> ${ENV_FILE}; \
+		echo "ADDR=$${ADDR}" >> ${ENV_FILE}; \
+		echo "PEER_ID=$${PEER_ID}" >> ${ENV_FILE}; \
+		echo "Updated ${ENV_FILE} with gateway peer"; \
+	)
+
 
 reset: stop ## Reset project for re-init prysm
 	@echo "Resetting ${PROJECT_NAME}..."
@@ -50,10 +54,18 @@ stop: ## Stop compose services
 	@echo "Stopping ${PROJECT_NAME} services..."
 	docker compose down
 
-clean: ## Stop compose services
-	@echo "Stopping ${PROJECT_NAME} services..."
-	docker stop $(docker ps -a -q)
-	docker rm $(docker ps -a -q)
+clean: stop ## Stop services and remove all data + env
+	@echo "Cleaning ${PROJECT_NAME} completely..."
+	# Stop and remove *all* docker containers
+	docker stop $$(docker ps -a -q) || true
+	docker rm $$(docker ps -a -q) || true
+	docker volume prune -f
+	docker network prune -f
+	# Remove local data dirs
+	rm -rf ${ETHEREUM_KEY_DIR}
+	rm -rf ${GETH_DATA_DIR}
+	rm -rf ${PRYSM_DATA_DIR}
+	rm -f ${JWT_SECRET_FILE}
 
 # ============================================================
 # Run targets with profiles
