@@ -30,6 +30,8 @@ make init
 
 ### **Step 2: Choose Your Path**
 
+Choose Lite if you already run an EL/CL stack. Choose Full if you want the all-in-one bundle with no prerequisites.
+
 #### **HOP Lite** (for validators)
 
 ```bash
@@ -50,7 +52,7 @@ make run
 
 ### **Step 3: Access Dashboards**
 
-* **Grafana**: http://localhost:3000 (admin/admin)
+* **Grafana**: http://localhost:3000 (default credentials: admin/admin)
 * **Prometheus**: http://localhost:9090  
 * **Gateway API**: http://localhost:48123
 
