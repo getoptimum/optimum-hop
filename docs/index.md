@@ -6,11 +6,9 @@ HOP is a **Docker Compose framework** and **test suite** for quickly experimenti
 
 ### **Simplicity Through Identity**
 
-Instead of manually stitching together EL/CL clients, Optimum Gateway, Prometheus, Grafana, and other services, HOP ships as one ready-to-run compose bundle (`getoptimum/hop`).
+Instead of manually stitching together EL/CL clients, Optimum Gateway, Prometheus, Grafana, and other services, HOP ships as one ready-to-run compose bundle.
 
-### **Recognizable & Consistent**
-
-Naming makes HOP recognizable across docs, conversations, and deployments. When you say "spin up HOP v0.0.1", everyone knows exactly what you mean - a complete, tested environment that just works.
+**Repository:** [https://github.com/getoptimum/optimum-hop](https://github.com/getoptimum/optimum-hop)
 
 ### **Focus on What Matters**
 
