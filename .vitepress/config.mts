@@ -139,12 +139,12 @@ title: 'HOP Docs',
 function sidebarHome() {
   return [
     {
-      text: "Integration Overview",
+      text: "Documentation",
       collapsed: false,
       items: [
         {
-          text: "Ethereum Consensus Layer",
-          link: "/integration/README.md",
+          text: "Complete Setup Guide",
+          link: "/docs/",
         },
       ],
     },
