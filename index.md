@@ -11,8 +11,6 @@ It provides ready-to-use bundles that remove setup overhead and let teams focus 
 ## Quick Navigation
 
 * **[Complete Setup Guide](./docs/)** - Everything you need to get started
-* **[Technical Integration](./integration/README.md)** - Gateway configuration reference
-
 
 
 ## What's HOP?
@@ -41,8 +39,8 @@ It provides ready-to-use bundles that remove setup overhead and let teams focus 
 
 ```bash
 # Quick start - choose your path
-make lite    # HOP Lite (validators)
-make run     # HOP Full (complete testing)
+GATEWAY_ID=yourorg-region-01 docker compose --profile lite up -d     # HOP Lite
+GATEWAY_ID=yourorg-region-01 docker compose --profile full up -d     # HOP Full
 ```
 
 **Ready to hop on?** → [Start here](./docs/)

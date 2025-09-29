@@ -6,21 +6,17 @@ HOP is a **Docker Compose framework** and **test suite** for quickly experimenti
 
 ### **Simplicity Through Identity**
 
-Instead of manually stitching together EL/CL clients, Optimum Gateway, Prometheus, Grafana, and other services, HOP ships as one ready-to-run compose bundle.
+Instead of manually stitching together EL/CL clients, Optimum Gateway, Prometheus, Grafana, and other services, HOP ships as one ready-to-run compose bundle (`getoptimum/hop`).
 
 ### **Recognizable & Consistent**
 
-Naming makes HOP recognizable across docs, conversations, and deployments.
+Naming makes HOP recognizable across docs, conversations, and deployments. When you say "spin up HOP v0.0.1", everyone knows exactly what you mean - a complete, tested environment that just works.
 
 ### **Focus on What Matters**
 
 HOP removes setup overhead so teams can focus on what's important: testing, measuring, and visualizing mumP2P performance across different networks and use cases.
 
 ## Prerequisites
-
-### **Access Requirements**
-
-* **Network access**: Contact Optimum team for network configuration
 
 ### **System Requirements**
 
@@ -41,353 +37,274 @@ HOP removes setup overhead so teams can focus on what's important: testing, meas
 
 ## Quick Start
 
-### **Step 1: Get Your HOP Bundle**
+### **Step 1: Understanding the HOP Repository**
 
-Contact the Optimum team for network access.
+You have received the HOP repository with the following structure:
 
-The HOP bundle includes a complete `docker-compose.yml` with pre-configured services:
-
-<details>
-<summary>HOP Docker Compose (click to expand)</summary>
-
-```yaml
-services:
-  # ========================================================
-  # Optimum Gateway service (always required)
-  # ========================================================
-  optimum-gateway:
-    # platform: linux/arm64
-    image: getoptimum/gateway:${GATEWAY_VERSION}   # Use version from env var
-    container_name: optimum-gateway
-    restart: unless-stopped
-    profiles: ["lite", "teku", "prysm", "lighthouse"]
-    ports:
-      - "33212:33212"         # libp2p port
-      - "33213:33213"         # OptimumP2P port
-      - "48123:48123"         # Telemetry/metrics port
-    volumes:
-      - ./config:/app/config  # Config directory (must contain app_conf.yml)
-      - ./identity/libp2p:/tmp/libp2p  # Persistent libp2p identity
-      - ./identity/optp2p:/tmp/optp2p  # Persistent OptimumP2P identity
-    environment:
-      - OPT_GATEWAY_ID=${GATEWAY_ID:-local-dockerized}  # Override Gateway ID from env
-    command: ["-config=/app/config/app_conf.yml"]  # Explicit config path
-    networks:
-      hop-hoodi-testnet:
-        ipv4_address: 172.29.0.XX
-
-  # ========================================================
-  # Execution Layer (EL) - choose either geth OR nethermind
-  # Activated using --profile geth or --profile nethermind
-  # Both expose alias "execution" so CL clients can connect
-  # ========================================================
-  geth:
-    image: ethereum/client-go:${GETH_VERSION:-stable}
-    container_name: geth
-    restart: unless-stopped
-    profiles: ["geth"]  # run only if --profile geth or full
-    command:
-      - --hoodi                        # Custom Hoodi testnet flag
-      - --http                         # Enable HTTP RPC
-      - --http.api=eth,net,engine,admin
-      - --authrpc.jwtsecret=/jwt.hex   # JWT secret for EL-CL auth
-      - --datadir=/data
-    ports:
-      - "8545:8545"           # HTTP RPC
-      - "8551:8551"           # Auth RPC (Engine API for CL)
-      - "30303:30303/tcp"     # P2P TCP
-      - "30303:30303/udp"     # P2P UDP (discovery)
-    volumes:
-      - ./hop-hoodi/geth-data:/data
-      - ./hop-hoodi/ethereum:/ethereum
-      - ./hop-hoodi/jwt.hex:/jwt.hex
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8545"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-    networks:
-      hop-hoodi-testnet:
-        aliases:
-          - execution # gives this EL the alias "execution"
-
-  nethermind:
-    image: nethermind/nethermind:${NETHERMIND_VERSION:-1.33.0}
-    container_name: nethermind
-    restart: unless-stopped
-    profiles: ["nethermind"]
-    ports:
-      - "8545:8545"          # HTTP RPC
-      - "8551:8551"         # Auth RPC (Engine API for CL)
-      - "30303:30303/tcp"    # P2P TCP
-      - "30303:30303/udp"   # P2P UDP (discovery)
-    command: >
-      --config=hoodi
-      --datadir=/nethermind/data
-      --JsonRpc.Enabled=true
-      --JsonRpc.JwtSecretFile="/root/jwt/jwt.hex"
-      --JsonRpc.EngineHost=0.0.0.0
-      --JsonRpc.EnginePort=8551
-      --JsonRpc.Host=0.0.0.0
-      --JsonRpc.Port=8545
-      --Metrics.Enabled=true
-      --Metrics.ExposePort=8008
-      --Sync.SnapSync=true
-    volumes:
-      - ./data/nethermind:/nethermind/data
-      - ./hop-hoodi/jwt.hex:/root/jwt/jwt.hex
-    networks:
-      hop-hoodi-testnet:
-        aliases:
-          - execution # gives this EL the alias "execution"
-
-  # ========================================================
-  # Consensus Layer (CL) - choose prysm, teku, or lighthouse
-  # They connect to whichever EL is running via alias "execution"
-  # GATEWAY_PEER is split during make init into ADDR + PEER_ID
-  # ========================================================
-  prysm-beacon:
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:${PRYSM_VERSION:-stable}
-    container_name: prysm-beacon
-    restart: unless-stopped
-    profiles: ["prysm"]
-    command:
-      - --execution-endpoint=http://execution:8551   # Connect to Geth EL
-      - --datadir=/eth-hoodi-disk/prysm-data
-      - --hoodi
-      - --jwt-secret=/jwt.hex
-      - --checkpoint-sync-url=https://hoodi.beaconstate.info   # Quick sync
-      - --genesis-beacon-api-url=https://hoodi.beaconstate.info
-      - --accept-terms-of-use
-      - --peer=${GATEWAY_PEER}   # Connect to Optimum Gateway
-    ports:
-      - "4000:4000"           # Prysm gRPC
-      - "3500:3500"           # HTTP API
-      - "12000:12000/tcp"     # P2P TCP
-      - "12000:12000/udp"     # P2P UDP
-      - "13000:13000"         # Extra P2P
-    volumes:
-      - ./hop-hoodi/prysm-data:/prysm-data
-      - ./hop-hoodi/ethereum:/ethereum
-      - ./hop-hoodi/jwt.hex:/jwt.hex
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:13000/eth/v1/node/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    networks:
-      - hop-hoodi-testnet
-
-  teku-beacon:
-    image: consensys/teku:${TEKU_VERSION:-latest}
-    container_name: teku-beacon
-    restart: unless-stopped
-    user: "0:0"
-    profiles: ["teku"]
-    volumes:
-      - ./hop-hoodi/teku-data:/teku-data
-      - ./hop-hoodi/jwt.hex:/jwt.hex
-    command:
-      - --network=hoodi
-      - --data-base-path=/teku-data
-      - --checkpoint-sync-url=https://hoodi.beaconstate.info
-      - --ee-endpoint=http://execution:8551       # Connect to Geth EL
-      - --ee-jwt-secret-file=/jwt.hex
-      - --p2p-enabled=true
-      - --p2p-discovery-enabled=true
-      - --p2p-port=13000
-      - --metrics-enabled=true
-      - --metrics-host-allowlist=*
-      - --metrics-interface=0.0.0.0
-      - --metrics-port=8008
-      - --rest-api-enabled=true
-      - --rest-api-port=3500
-      - --rest-api-host-allowlist=*
-      - --validators-proposer-default-fee-recipient=0x0000000000000000000000000000000000000000
-      - --p2p-direct-peers=${GATEWAY_PEER}   # Connect to Optimum Gateway
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3500/eth/v1/node/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    networks:
-      - hop-hoodi-testnet
-
-  lighthouse:
-    image: sigp/lighthouse:${LIGHTHOUSE_VERSION:-v7.1.0}
-    profiles: ["lighthouse"]
-    restart: unless-stopped
-    ports:
-      - 9000:9000/tcp # P2P TCP
-      - 9000:9000/udp # P2P UDP
-      - 5052:5052   # HTTP API
-    command: |
-      lighthouse bn
-      --network=hoodi
-      --checkpoint-sync-url=https://hoodi.beaconstate.info 
-      --checkpoint-sync-url-timeout=600
-      --execution-endpoint=http://execution:8551
-      --execution-jwt=/jwt/jwt.hex
-      --datadir=/lighthouse-data
-      --http
-      --http-address=0.0.0.0
-      --http-port=5052
-      --metrics
-      --metrics-address=0.0.0.0
-      --metrics-port=5054
-      --metrics-allow-origin="*"
-      --libp2p-addresses=${ADDR}
-      --trusted-peers=${PEER_ID}
-    volumes:
-      - ./hop-hoodi/lighthouse-data:/lighthouse-data
-      - ./hop-hoodi/jwt.hex:/jwt/jwt.hex
-    networks:
-      - hop-hoodi-testnet
-
-  # ========================================================
-  # Monitoring stack (only enabled with --profile full)
-  # ========================================================
-
-  # Prometheus metrics collector
-  prometheus:
-    image: prom/prometheus:latest
-    profiles: ["lite", "full"]  # enabled with either profile
-    volumes:
-      - ../grafana/prometheus:/etc/prometheus  # Prometheus config
-      - prometheus-data:/prometheus            # Persist TSDB data
-    ports:
-      - "9090:9090"          # Prometheus UI
-    restart: unless-stopped
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-      - "--storage.tsdb.path=/prometheus"
-      - "--storage.tsdb.retention.time=1h"     # Keep 1h of history
-      - "--storage.tsdb.retention.size=2GB"    # Or max 2GB
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9090/-/healthy"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    logging:   # Limit log size to avoid disk bloat
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - hop-hoodi-testnet
-
-  grafana:
-    image: grafana/grafana:latest
-    profiles: ["lite", "full"]  # enabled with either profile
-    ports:
-      - "3000:3000"          # Grafana UI
-    volumes:
-      - ../grafana/grafana-provisioning:/etc/grafana/provisioning:ro  # Datasources
-      - ../grafana/grafana-dashboards:/var/lib/grafana/dashboards:ro # Dashboards
-      - grafana-data:/var/lib/grafana                                 # Persist state
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin   # Default admin user
-      - GF_SECURITY_ADMIN_PASSWORD=admin  # Default password (change in prod!)
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    logging:   # Limit logs
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
-    networks:
-      - hop-hoodi-testnet
-    depends_on:
-      - prometheus
-
-volumes:
-  prometheus-data:   # Persistent Prometheus storage
-  grafana-data:      # Persistent Grafana storage
-
-networks:
-  hop-hoodi-testnet:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.29.0.0/16
+```text
+optimum-hop/
+├── integration/
+│   ├── ethereum/           # Main Ethereum integration
+│   │   ├── docker-compose.yml    # Service orchestration
+│   │   ├── Makefile              # Automation commands
+│   │   ├── .env.example          # Environment template
+│   │   ├── config/
+│   │   │   └── sample.app_conf.yml
+│   │   └── prysm.sh              # Prysm setup script
+│   ├── grafana/            # Monitoring configuration
+│   │   ├── grafana-dashboards/   # Pre-built dashboards
+│   │   ├── grafana-provisioning/ # Grafana setup
+│   │   └── prometheus/           # Metrics collection
+│   └── README.md           # Technical integration guide
+└── docs/                   # This documentation site
 ```
 
-</details>
+#### **integration/ethereum/**
 
-### **Step 2: Choose Your Path**
+This is your main working directory containing:
 
-#### **HOP Lite** (for validators with existing infrastructure)
+* **Docker Compose setup** for running the full stack
+* **Makefile** with automation commands
+* **Configuration templates** for Gateway and clients
+
+#### **integration/grafana/**
+
+Pre-configured monitoring stack with:
+
+* **Grafana dashboards** for visualizing Gateway metrics
+* **Prometheus configuration** for collecting metrics
+* **Data source definitions** connecting Grafana to Prometheus
+
+### **Step 2: Navigate to Ethereum Integration**
+
+```bash
+cd integration/ethereum/
+```
+
+This directory contains everything needed to run HOP.
+
+### **Step 3: Configure Gateway Settings**
+
+```bash
+# Copy the Gateway configuration template
+cp config/sample.app_conf.yml config/app_conf.yml
+```
+
+**Important**: Edit `config/app_conf.yml` and update:
+
+* **gateway_id**: Set your unique Gateway ID (format: `yourorg-region-hoodi-01`)
+* **proxy_host**: Use the proxy addresses provided by the Optimum team
+
+**Note**: Proxy host addresses will be provided during onboarding.
+
+### **Step 4: Initialize Your Environment**
+
+```bash
+make init
+```
+
+This command:
+
+* Creates data directories (`hop-hoodi/`)
+* Copies `.env.example` to `.env` (if `.env` doesn't exist)
+* Generates JWT secret for EL-CL communication  
+* Starts Gateway container to discover peer information
+* Updates your `.env` file with Gateway peer details
+
+**Expected output:**
+
+```text
+Initializing hop-hoodi-testnet...
+Create jwt secret
+Starting gateway container to fetch peer info...
+Container optimum-gateway  Running
+Waiting for gateway API...
+Discovered GATEWAY_PEER=/ip4/172.29.0.16/tcp/33212/p2p/16Uiu2HAm...
+Updated .env with gateway peer
+```
+
+### **Step 5: Choose Your Path**
+
+Now you can run HOP using either **Makefile commands** (recommended) or **Docker Compose commands** directly.
+
+## Available Commands
+
+### **Makefile Commands**
+
+| Command | Description | Use Case |
+|---------|-------------|----------|
+| `make help` | Show all available commands | Get command reference |
+| `make init` | Initialize environment and discover Gateway peer | First-time setup |
+| `make lite` | Run Gateway + Monitoring only | Validators with existing infrastructure |
+| `make run` | Run Geth + Prysm + Monitoring | Complete testing environment |
+| `make run_teku` | Run Nethermind + Teku + Monitoring | Alternative CL client |
+| `make run_lighthouse` | Run Nethermind + Lighthouse + Monitoring | Alternative CL client |
+| `make run_prysm` | Run Nethermind + Prysm + Monitoring | Alternative EL client |
+| `make stop` | Stop all services | Clean shutdown |
+| `make clean` | Stop services and remove all data | Complete cleanup |
+| `make reset` | Reset project for re-initialization | Fresh start |
+
+### **Docker Compose Commands**
+
+For direct Docker Compose control:
+
+#### **HOP Lite**
 
 ```bash
 GATEWAY_ID=$GATEWAY_ID docker compose --profile lite up -d
 ```
 
-* Gateway + Monitoring only
-* Connect to your existing Ethereum nodes
-* Perfect for production validator setups
+#### **HOP Full - Different Client Combinations**
 
-#### **HOP Full** (for complete testing environment)
+**Geth + Prysm:**
 
 ```bash
-NETWORK_TAG=hoodi GATEWAY_ID=$GATEWAY_ID docker compose --profile full up -d
+GATEWAY_ID=$GATEWAY_ID docker compose --profile full --profile geth --profile prysm up -d
 ```
 
-* Full Ethereum node + Gateway + Monitoring
-* Everything included in one bundle
-* Ideal for builders and ecosystem teams
+**Nethermind + Teku:**
 
-### **Step 3: Access Dashboards**
+```bash
+GATEWAY_ID=$GATEWAY_ID docker compose --profile full --profile nethermind --profile teku up -d
+```
 
-* **Grafana**: <http://localhost:3000> (default credentials: admin/admin)
+**Nethermind + Lighthouse:**
+
+```bash
+GATEWAY_ID=$GATEWAY_ID docker compose --profile full --profile nethermind --profile lighthouse up -d
+```
+
+#### **Stop Services**
+
+```bash
+docker compose down
+```
+
+## Running HOP
+
+### **HOP Lite** (for validators with existing infrastructure)
+
+Use this if you already run Ethereum nodes and just want to add the Gateway and monitoring.
+
+```bash
+make lite
+```
+
+**What this does:**
+
+* Starts Optimum Gateway
+* Starts Prometheus (metrics collection)
+* Starts Grafana (dashboards)
+* Connects to your existing Ethereum infrastructure
+
+### **HOP Full** (for complete testing environment)
+
+Use this if you want a complete Ethereum environment for testing and evaluation.
+
+#### **Option 1: Geth + Prysm (Default)**
+
+```bash
+make run
+```
+
+**What this includes:**
+
+* Geth (Execution Layer)
+* Prysm (Consensus Layer)  
+* Optimum Gateway
+* Prometheus + Grafana monitoring
+
+#### **Option 2: Nethermind + Teku**
+
+```bash
+make run_teku
+```
+
+**What this includes:**
+
+* Nethermind (Execution Layer)
+* Teku (Consensus Layer)
+* Optimum Gateway
+* Prometheus + Grafana monitoring
+
+#### **Option 3: Nethermind + Lighthouse**
+
+```bash
+make run_lighthouse
+```
+
+**What this includes:**
+
+* Nethermind (Execution Layer)
+* Lighthouse (Consensus Layer)
+* Optimum Gateway
+* Prometheus + Grafana monitoring
+
+## Access Your HOP Environment
+
+Once HOP is running, you can access:
+
+### **Monitoring Dashboards**
+
+* **Grafana**: <http://localhost:3000> (credentials: admin/admin)
 * **Prometheus**: <http://localhost:9090>
+
+### **Gateway API**
+
 * **Gateway Metrics**: <http://localhost:48123/metrics>
+* **Gateway Info**: <http://localhost:48123/api/v1/self_info>
 
-## HOP Variants
-
-### **HOP Lite**
-
-* **Audience**: Validators running large-scale fleets
-* **Status**: Available now (private access)
-* **Networks**: Ethereum Hoodi (now), Mainnet (later)
-* **Contents**: Gateway + Prometheus + Grafana
-* **Use Case**: Add mumP2P to existing validator infrastructure
-
-### **HOP Full**
-
-* **Audience**: Builders, testers, ecosystem teams
-* **Status**: Available now (private access), public in ~1 month
-* **Networks**: Ethereum Hoodi and Mainnet
-* **Contents**: EL/CL + Gateway + Prometheus + Grafana
-* **Use Case**: Complete testing environment with no prerequisites
-
-### **HOP Flex** *(future)*
-
-* **Audience**: Community participants joining as P2P nodes
-* **Networks**: Hoodi + Mainnet
-* **Contents**: Telemetry + dashboards + optional leaderboards
-* **Incentive**: Potential MUM airdrop → Flexnode staking
-
-## Service Management
-
-### **Available Docker Compose Profiles**
+### **Test Your Setup**
 
 ```bash
-# Profile combinations
---profile lite                    # Gateway + Monitoring only
---profile full                    # Complete stack with EL/CL
---profile full --profile geth     # Use Geth execution client
---profile full --profile prysm    # Use Prysm consensus client
---profile full --profile teku     # Use Teku consensus client
+# Check Gateway status
+curl -s http://localhost:48123/api/v1/self_info | jq .
+
+# Check Grafana health
+curl -s http://localhost:3000/api/health | jq .
 ```
 
+## Managing Your HOP Environment
 
-### **Service Status**
+### **Stop Services**
 
-Check all HOP services:
+```bash
+make stop
+```
+
+### **Clean Up Everything**
+
+```bash
+make clean  # Removes all data and containers
+```
+
+### **Reset for Fresh Start**
+
+```bash
+make reset  # Stops, cleans, and prepares for re-initialization
+```
+
+## Service Status
+
+### **Check Running Services**
+
+```bash
+docker compose ps
+```
+
+### **View Service Logs**
+
+```bash
+# Gateway logs
+docker logs optimum-gateway
+
+# Geth logs  
+docker logs geth
+
+# Prysm logs
+docker logs prysm-beacon
+```
+
 
 ```bash
 # View running services
@@ -433,17 +350,26 @@ curl -s http://localhost:48123/metrics | grep gateway_id
 
 ## Data Structure
 
-HOP creates persistent data directories:
+HOP creates a `hop-hoodi/` directory with persistent data:
 
 ```text
-hop-data/
-├── ethereum/           # Ethereum configuration
-├── geth-data/         # Geth blockchain data (if using HOP Full)
+hop-hoodi/
+├── ethereum/           # Ethereum network configuration
+├── geth-data/         # Geth blockchain data (if using Geth)
+├── prysm-data/        # Prysm beacon chain data (if using Prysm)
+├── teku-data/         # Teku beacon chain data (if using Teku)
+├── lighthouse-data/   # Lighthouse beacon chain data (if using Lighthouse)
 ├── jwt.hex            # JWT secret for EL-CL authentication
-├── prysm-data/        # Prysm beacon data (if using Prysm)
-├── teku-data/         # Teku beacon data (if using Teku)
-└── grafana-data/      # Grafana dashboards and settings
+└── logs/              # Service logs for troubleshooting
 ```
+
+**Additional Docker Volumes:**
+
+```text
+prometheus-data/       # Persistent Prometheus metrics storage
+grafana-data/         # Persistent Grafana dashboards and settings
+```
+
 
 ## Troubleshooting
 
@@ -512,7 +438,7 @@ If you encounter HOP issues:
 1. Check HOP service logs: `docker compose logs <service-name>`
 2. Verify all services are running: `docker compose ps`
 3. Test individual service endpoints
-4. For Gateway configuration issues, see [Technical Integration](../integration/README.md)
+4. Check service logs: `docker logs <service-name>`
 5. Contact the Optimum team for support
 
 ## External Resources
@@ -534,7 +460,4 @@ If you encounter HOP issues:
 1. **Start with HOP Lite** if you're a validator with existing infrastructure
 2. **Try HOP Full** for complete testing and evaluation
 3. **Monitor performance** using the included Grafana dashboards
-4. **Explore advanced configuration** in [Technical Integration](../integration/README.md)
 
-
-**Ready to optimize your validator performance?** Contact the Optimum team for network access.

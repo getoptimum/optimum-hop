@@ -146,10 +146,6 @@ function sidebarHome() {
           text: "Complete Setup Guide",
           link: "/docs/",
         },
-        {
-          text: "Integration Overview",
-          link: "/integration/README.md",
-        },
       ],
     },
     {
