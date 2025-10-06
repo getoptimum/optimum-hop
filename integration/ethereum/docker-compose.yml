@@ -10,12 +10,12 @@ services:
     profiles: ["lite", "teku", "prysm", "lighthouse"]
     ports:
       - "33212:33212"         # libp2p port
-      - "33213:33213"         # OptimumP2P port
+      - "33213:33213"         # mumP2P port
       - "48123:48123"         # Telemetry/metrics port
     volumes:
       - ./config:/app/config  # Config directory (must contain app_conf.yml)
       - ./identity/libp2p:/tmp/libp2p  # Persistent libp2p identity
-      - ./identity/optp2p:/tmp/optp2p  # Persistent OptimumP2P identity
+      - ./identity/optp2p:/tmp/optp2p  # Persistent mumP2P protocol identity
     command: ["-config=/app/config/app_conf.yml"]  # Explicit config path
     networks:
       hop-hoodi-testnet:
