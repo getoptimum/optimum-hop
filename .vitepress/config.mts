@@ -125,6 +125,7 @@ title: 'HOP Docs',
       light: "/logo-light.png",
       dark: "/logo-dark.png",
     },
+    logoLink: "https://docs.getoptimum.xyz/",
 
     siteTitle: false,
 
@@ -153,14 +154,8 @@ function sidebarHome() {
       collapsed: false,
       items: [
         {
-          text: "OptimumP2P",
-          collapsed: true,
-          items: [
-            {
-              text: "TODO::",
-              link: "TODO::",
-            },
-          ]
+          text: "mump2p",
+          link: "https://docs.getoptimum.xyz/docs/research/gossip/gossip",
         },
       ],
     },
