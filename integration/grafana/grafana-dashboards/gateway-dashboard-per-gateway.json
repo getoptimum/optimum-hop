@@ -18,7 +18,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 9,
+  "id": 31,
   "links": [],
   "panels": [
     {
@@ -102,7 +102,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -131,17 +131,15 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "fixedColor": "#333232",
+            "mode": "fixed"
           },
           "custom": {
             "align": "auto",
             "cellOptions": {
-              "mode": "gradient",
-              "type": "color-background"
+              "type": "auto"
             },
-            "footer": {
-              "reducers": []
-            },
+            "filterable": false,
             "inspect": false
           },
           "mappings": [],
@@ -166,9 +164,17 @@
       "id": 11,
       "options": {
         "cellHeight": "lg",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
         "showHeader": false
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -211,7 +217,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "fixedColor": "green",
+            "mode": "fixed"
           },
           "mappings": [],
           "thresholds": {
@@ -259,9 +266,9 @@
         "tooltip": {
           "mode": "single"
         },
-        "valueMode": "color"
+        "valueMode": "text"
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -280,8 +287,9 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
+          "exemplar": false,
           "expr": "optp2p_gateway_optimum_gateway_opt_peers\n{gateway_id=~\"$gateway_id\"}",
-          "legendFormat": "Opt peers",
+          "legendFormat": "Optimum peers",
           "range": true,
           "refId": "B"
         }
@@ -327,14 +335,14 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 0,
         "y": 9
       },
       "id": 2,
       "options": {
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -350,7 +358,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -396,14 +404,14 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 6,
         "y": 9
       },
       "id": 23,
       "options": {
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "area",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -419,7 +427,7 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -447,7 +455,8 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "thresholds"
+            "fixedColor": "#f7f7f7",
+            "mode": "fixed"
           },
           "mappings": [],
           "max": 12,
@@ -466,7 +475,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 12,
         "y": 9
@@ -487,7 +496,7 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -509,7 +518,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "bf6v3ibdvwgsge"
+        "uid": "PBFA97CFB590B2093"
       },
       "description": "Latest block arrival latency (beacon_block) for this gateway.",
       "fieldConfig": {
@@ -532,7 +541,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 6,
+        "h": 5,
         "w": 6,
         "x": 18,
         "y": 9
@@ -555,7 +564,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -581,7 +590,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 15
+        "y": 14
       },
       "id": 24,
       "panels": [],
@@ -623,7 +632,7 @@
         "h": 7,
         "w": 5,
         "x": 0,
-        "y": 16
+        "y": 15
       },
       "id": 21,
       "options": {
@@ -643,7 +652,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -695,7 +704,7 @@
         "h": 7,
         "w": 6,
         "x": 5,
-        "y": 16
+        "y": 15
       },
       "id": 9,
       "options": {
@@ -715,7 +724,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -767,7 +776,7 @@
         "h": 7,
         "w": 6,
         "x": 11,
-        "y": 16
+        "y": 15
       },
       "id": 20,
       "options": {
@@ -787,7 +796,7 @@
         "textMode": "value_and_name",
         "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -837,13 +846,15 @@
         "h": 7,
         "w": 7,
         "x": 17,
-        "y": 16
+        "y": 15
       },
       "id": 16,
       "options": {
-        "minVizHeight": 75,
-        "minVizWidth": 75,
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
         "orientation": "auto",
+        "percentChangeColorMode": "standard",
         "reduceOptions": {
           "calcs": [
             "lastNotNull"
@@ -851,12 +862,11 @@
           "fields": "",
           "values": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": true,
-        "sizing": "auto",
-        "text": {}
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -871,7 +881,7 @@
         }
       ],
       "title": "mump2p - eth delta (latest)",
-      "type": "gauge"
+      "type": "stat"
     },
     {
       "datasource": {
@@ -908,7 +918,6 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -940,7 +949,7 @@
         "h": 7,
         "w": 24,
         "x": 0,
-        "y": 23
+        "y": 22
       },
       "id": 6,
       "options": {
@@ -960,7 +969,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -983,7 +992,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 30
+        "y": 29
       },
       "id": 4,
       "panels": [],
@@ -1025,7 +1034,6 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1047,13 +1055,44 @@
           },
           "unit": "ms"
         },
-        "overrides": []
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "optimum_gateway_eu - mump2p total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "optimum_gateway_eu - eth total"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "blue",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
       },
       "gridPos": {
         "h": 9,
         "w": 12,
         "x": 0,
-        "y": 31
+        "y": 30
       },
       "id": 5,
       "options": {
@@ -1073,7 +1112,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -1110,7 +1149,7 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "blue",
+            "fixedColor": "green",
             "mode": "fixed"
           },
           "custom": {
@@ -1140,7 +1179,6 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1168,7 +1206,7 @@
         "h": 9,
         "w": 12,
         "x": 12,
-        "y": 31
+        "y": 30
       },
       "id": 25,
       "options": {
@@ -1188,7 +1226,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -1211,7 +1249,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 40
+        "y": 39
       },
       "id": 7,
       "panels": [],
@@ -1253,7 +1291,6 @@
               "type": "linear"
             },
             "showPoints": "never",
-            "showValues": false,
             "spanNulls": false,
             "stacking": {
               "group": "A",
@@ -1281,7 +1318,7 @@
         "h": 8,
         "w": 24,
         "x": 0,
-        "y": 41
+        "y": 40
       },
       "id": 26,
       "options": {
@@ -1301,7 +1338,7 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "12.2.0",
+      "pluginVersion": "12.1.0",
       "targets": [
         {
           "datasource": {
@@ -1332,11 +1369,10 @@
   ],
   "preload": false,
   "refresh": "5s",
-  "schemaVersion": 42,
+  "schemaVersion": 41,
   "tags": [
-    "optimum",
-    "gateway",
-    "v0.0.1-rc9"
+    "v0.0.1-rc9",
+    "ethereum_hoodi_testnet"
   ],
   "templating": {
     "list": [
@@ -1371,12 +1407,12 @@
     ]
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Optimum Gateway - Per Gateway View",
+  "title": "Optimum Gateway - Per Gateway View (v0.0.1-rc9)",
   "uid": "gateway-per-gateway",
-  "version": 6
+  "version": 17
 }
