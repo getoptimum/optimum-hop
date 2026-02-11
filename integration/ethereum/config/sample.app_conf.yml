@@ -7,9 +7,6 @@ telemetry_enable: true
 telemetry_port: 48123
 gateway_cluster_id: optimum_hoodi_v0_1
 gateway_id: local-dockerized
-proxy_host:
-  - proxy_1:50051
-  - proxy_1:50051
 # Hoodi testnet fork digests:
 # - ae9f70a0: Initial Hoodi/Fusaka
 # - c6ecb76c: Fusaka BPO2 (Blob Parameter Only fork 2 - increases blob capacity to 14/21)
