@@ -7,79 +7,16 @@ telemetry_enable: true
 telemetry_port: 48123
 gateway_cluster_id: optimum_hoodi_v0_1
 gateway_id: local-dockerized
-# Hoodi testnet fork digests:
-# - ae9f70a0: Initial Hoodi/Fusaka
-# - c6ecb76c: Fusaka BPO2 (Blob Parameter Only fork 2 - increases blob capacity to 14/21)
-# Update fork digest below based on current network state
+# eth_topics_subscribe: topic names only (fork digest from bootstrap)
 eth_topics_subscribe:
-  - /eth2/c6ecb76c/beacon_aggregate_and_proof/ssz_snappy
-  - /eth2/c6ecb76c/beacon_block/ssz_snappy
-  - /eth2/c6ecb76c/voluntary_exit/ssz_snappy
-  - /eth2/c6ecb76c/proposer_slashing/ssz_snappy
-  - /eth2/c6ecb76c/attester_slashing/ssz_snappy
-  - /eth2/c6ecb76c/sync_committee_contribution_and_proof/ssz_snappy
-  - /eth2/c6ecb76c/bls_to_execution_change/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_0/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_1/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_2/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_3/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_4/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_5/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_6/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_7/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_8/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_9/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_10/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_11/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_12/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_13/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_14/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_15/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_16/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_17/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_18/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_19/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_20/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_21/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_22/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_23/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_24/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_25/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_26/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_27/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_28/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_29/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_30/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_31/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_32/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_33/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_34/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_35/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_36/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_37/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_38/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_39/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_40/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_41/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_42/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_43/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_44/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_45/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_46/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_47/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_48/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_49/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_50/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_51/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_52/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_53/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_54/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_55/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_56/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_57/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_58/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_59/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_60/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_61/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_62/ssz_snappy
-  - /eth2/c6ecb76c/beacon_attestation_63/ssz_snappy
+  - beacon_block
+  - beacon_aggregate_and_proof
+  - voluntary_exit
+  - proposer_slashing
+  - attester_slashing
+  - sync_committee_contribution_and_proof
+  - bls_to_execution_change
+  - beacon_attestation_0
+  - beacon_attestation_1
+  - beacon_attestation_2
+  # ... through beacon_attestation_63
