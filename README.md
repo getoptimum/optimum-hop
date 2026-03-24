@@ -9,3 +9,9 @@ It’s the quickest way to experiment with **mumP2P** without manual setup.
 
 * Ethereum See [./integration/README.md](./integration/README.md)
 
+## Docs site (this repository)
+
+```bash
+npm ci          # or: npm install
+make run-dev    # VitePress dev server; use make build for production build
+```
