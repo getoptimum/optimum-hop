@@ -1,89 +1,130 @@
 # Optimum Gateway Integration
 
+Local development and testing setup for the Optimum Gateway with Ethereum EL/CL clients and monitoring.
+
+## Prerequisites
+
+* Docker and Docker Compose installed
+* Ports 33211, 33212, 43213, 48123, 9090, 3000 available
+
 ## Setup
 
 ```bash
+cd ethereum
 make init
 ```
 
 This will:
 
 * Create data directories
-* Generate a jwt.hex for EL ↔ CL authentication
+* Generate a `jwt.hex` for EL ↔ CL authentication
 * Start the Optimum Gateway and fetch its peer info
-* Write to .env
-
-```bash
-GATEWAY_PEER=/ip4/99.97.0.2/tcp/33212/p2p/16Uiu2HAm...
-ADDR=/ip4/99.97.0.2/tcp/33212
-PEER_ID=16Uiu2HAm...
-```
+* Write `GATEWAY_PEER`, `ADDR`, and `PEER_ID` to `.env`
 
 ## Running the Stack
 
-You can run the stack directly with Docker Compose or via Makefile commands.
+### With Makefile
+
+| Command | Description |
+|---------|-------------|
+| `make init` | Initialize project, generate jwt, discover GATEWAY_PEER |
+| `make run` | Run Geth + Prysm + Monitoring |
+| `make run_teku` | Run Nethermind + Teku + Monitoring |
+| `make run_lighthouse` | Run Nethermind + Lighthouse + Monitoring |
+| `make run_prysm` | Run Nethermind + Prysm + Monitoring |
+| `make lite` | Run Gateway + Metrics only (no EL/CL) |
+| `make stop` | Stop all services |
+| `make reset` | Wipe all data and re-init |
+| `make clean` | Stop services and remove all data + containers |
 
 ### With Docker Compose
 
-Profiles let you choose EL, CL, and monitoring:
-
-#### Run Geth + Prysm + Monitoring
+#### Geth + Prysm + Monitoring
 
 ```bash
 docker compose --profile full --profile geth --profile prysm up -d
 ```
 
-#### Run Nethermind + Teku + Monitoring
+#### Nethermind + Teku + Monitoring
 
 ```bash
 docker compose --profile full --profile nethermind --profile teku up -d
 ```
 
-#### Run Lighthouse + Nethermind + Monitoring
+#### Nethermind + Lighthouse + Monitoring
 
 ```bash
 docker compose --profile full --profile nethermind --profile lighthouse up -d
 ```
 
-#### Run Gateway + Metrics only (lite mode)
+#### Gateway + Metrics only (lite mode)
 
 ```bash
 docker compose --profile lite up -d
 ```
 
-### With Makefile
+## Configuration
 
-* `make init` - Initialize project, generate jwt, discover GATEWAY_PEER, update .env
-* `make run` - Run Geth + Prysm + Monitoring
-* `make run_teku` - Run Nethermind + Teku + Monitoring
-* `make run_lighthouse` - Run Nethermind + Lighthouse + Monitoring
-* `make run_prysm` - Run Nethermind + Prysm + Monitoring
-* `make lite` - Run Gateway + Metrics only
-* `make stop` - Stop all services
-* `make reset` - Wipe all data and re-init from scratch
-* `make clean` - Stop services and remove all data + containers
+Gateway config is in `ethereum/config/app_conf.yml` (copied from `sample.app_conf.yml` on first run).
 
-### Monitoring
+Key settings:
 
-* **Prometheus**: <http://localhost:9090>
-* **Grafana**: <http://localhost:3000> (default login: admin/admin)
-* **Gateway API**: <http://localhost:48123>
-
-### Test Gateway API
-
-```bash
-curl -s http://localhost:48123/api/v1/self_info | jq .
+```yaml
+gateway_cluster_id: optimum_hoodi_v0_3
+gateway_id: local-dockerized
+eth_topics_subscribe:
+  - beacon_block
 ```
 
-Expected output:
+Currently only `beacon_block` is supported. Attestation subnets will be added in RC12.
 
-```json
-{
-  "multiaddrs": [
-    "/ip4/172.29.0.16/tcp/33212"
-  ],
-  "peer_id": "16Uiu2HAkwbdyUeuFGCXFgbNGLrbNeLBEt4jHwWZg7VVrTvaXtVWp"
-}
+## Monitoring
+
+| Service | URL |
+|---------|-----|
+| Prometheus | http://localhost:9090 |
+| Grafana | http://localhost:3000 (admin/admin) |
+| Gateway API | http://localhost:48123 |
+
+Prometheus scrapes the gateway at `optimum-gateway:48123` (docker network). The Partner Dashboard is auto-provisioned in Grafana.
+
+## Verify
+
+```bash
+# Gateway version
+curl -s http://localhost:48123/api/v1/version
+
+# Gateway self info (peer ID, multiaddrs)
+curl -s http://localhost:48123/api/v1/self_info | jq .
+
+# Metrics
+curl -s http://localhost:48123/metrics | grep optp2p_gateway
+```
+
+When CL is connected: `cl_peers` ≥ 1, `libp2p_total_messages` increments.
+
+## Structure
+
+```text
+integration/
+├── ethereum/
+│   ├── docker-compose.yml      # Full stack: gateway + EL + CL + monitoring
+│   ├── Makefile                # Convenience targets
+│   ├── config/
+│   │   └── sample.app_conf.yml # Gateway config template
+│   ├── .env.example            # Environment variables (versions, peer info)
+│   └── prysm.sh               # JWT generation helper
+└── grafana/
+    ├── prometheus/
+    │   ├── prometheus.yml      # Prometheus scrape config
+    │   └── targets.json        # Scrape targets (gateway)
+    ├── grafana-provisioning/
+    │   ├── datasources/
+    │   │   └── prometheus.yaml # Auto-provisioned Prometheus datasource
+    │   └── dashboards/
+    │       └── dashboards.yml  # Dashboard provisioning config
+    └── grafana-dashboards/
+        └── partner-dashboard.json  # Partner Dashboard (auto-loaded)
 ```
 
 ## Important Notes
@@ -96,8 +137,6 @@ Expected output:
 ## Troubleshooting
 
 ### Gateway Connection Issues
-
-Check Gateway logs:
 
 ```bash
 docker logs optimum-gateway
@@ -117,21 +156,4 @@ Normal during startup, wait 2-3 minutes for full synchronization.
 
 ```bash
 make reset
-```
-
-## Known Issues
-
-### Geth + Teku
-
-```text
-WARN Beacon client online, but no consensus updates received in a while
-ERROR - Execution Client request failed. Make sure the Execution Client is online and can respond to requests.
-```
-
-### Geth + Lighthouse
-
-```text
-ERROR Error during execution engine upcheck
-      error: HttpClient(url: http://execution:8551/, kind: request,
-      detail: error trying to connect: tcp connect error: Connection refused (os error 111))
 ```

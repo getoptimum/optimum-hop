@@ -23,13 +23,17 @@ init: stop ## Initialize project and set GATEWAY_PEER in .env
 		echo "Creating ${ENV_FILE} from ${ENV_EXAMPLE}..."; \
 		cp ${ENV_EXAMPLE} ${ENV_FILE}; \
 	fi
+	@if [ ! -f config/app_conf.yml ]; then \
+		echo "Creating config/app_conf.yml from sample..."; \
+		cp config/sample.app_conf.yml config/app_conf.yml; \
+	fi
 	@echo "Starting gateway container to fetch peer info..."
 	@DOCKER_DEFAULT_PLATFORM=${PLATFORM} docker compose up -d --build optimum-gateway
 	@echo "Waiting for gateway API..."
-	@sleep 5
+	@sleep 10
 		@( \
 		PEER_ID=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '.peer_id'); \
-		ADDR=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '.multiaddrs[0]'); \
+		ADDR=$$(curl -s http://localhost:48123/api/v1/self_info | jq -r '[.libp2p.multiaddrs[] | select(startswith("/ip4/172."))] | first // .libp2p.multiaddrs[0]'); \
 		GATEWAY_PEER="$${ADDR}/p2p/$${PEER_ID}"; \
 		echo "Discovered GATEWAY_PEER=$${GATEWAY_PEER}"; \
 		sed -i.bak '/^GATEWAY_PEER=/d' "${ENV_FILE}"; \
@@ -87,7 +91,7 @@ run_prysm: stop ## Run full stack with Nethermind + Prysm + monitoring
 	@echo "Running ${PROJECT_NAME} (Nethermind + Prysm + Monitoring)..."
 	docker compose --profile full --profile nethermind --profile prysm up --build -d
 
-lite: stop ## Run without monitoring (Gateway + EL + CL only)
+lite: stop ## Run Gateway + Monitoring only (no EL/CL)
 	@echo "Running ${PROJECT_NAME} (lite mode: Gateway + Metrics only)..."
 	docker compose --profile lite up --build -d
 

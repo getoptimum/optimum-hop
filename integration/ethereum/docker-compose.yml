@@ -7,15 +7,16 @@ services:
     image: getoptimum/gateway:${GATEWAY_VERSION}   # Use version from env var
     container_name: optimum-gateway
     restart: unless-stopped
-    profiles: ["lite", "teku", "prysm", "lighthouse"]
+    profiles: ["lite", "full", "geth", "nethermind", "teku", "prysm", "lighthouse"]
     ports:
-      - "33212:33212"         # libp2p port
-      - "33213:33213"         # mumP2P port
+      - "33211:33211"         # sidecar gRPC (mump2p tracer)
+      - "33212:33212"         # libp2p port (CL clients connect here)
+      - "43213:43213"         # mump2p agent port
       - "48123:48123"         # Telemetry/metrics port
     volumes:
       - ./config:/app/config  # Config directory (must contain app_conf.yml)
-      - ./identity/libp2p:/tmp/libp2p  # Persistent libp2p identity
-      - ./identity/optp2p:/tmp/optp2p  # Persistent mumP2P protocol identity
+      - ./identity/libp2p:/tmp/libp2p   # Persistent libp2p identity
+      - ./identity/mump2p:/tmp/mump2p   # Persistent mump2p identity
     command: ["-config=/app/config/app_conf.yml"]  # Explicit config path
     networks:
       hop-hoodi-testnet:
@@ -191,7 +192,7 @@ services:
       - hop-hoodi-testnet
 
   # ========================================================
-  # Monitoring stack (only enabled with --profile full)
+  # Monitoring stack (enabled with --profile lite or --profile full)
   # ========================================================
 
   # Prometheus metrics collector
