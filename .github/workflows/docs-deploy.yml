@@ -1,22 +1,25 @@
-name: Docs CI (lint, build)
+name: Docs Deploy (GitHub Pages)
 
 on:
-  pull_request:
   push:
     branches:
       - main
-      - 'releases/**'
 
 concurrency:
-  group: docs-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: docs-deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Lint & build
+  deploy:
+    name: Build & deploy pages
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -32,13 +35,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Lint
-        run: make lint
-
-      - name: Lint markdown
-        run: make lint-markdown
-
       - name: Build VitePress
         env:
           BASE: /${{ github.event.repository.name }}/
         run: make build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .vitepress/dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
