@@ -30,8 +30,8 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,mjs,cjs}": [
-      "yarn lint:fix",
-      "yarn format"
+      "eslint --fix",
+      "prettier --write"
     ],
     "*.md": [
       "yarn lint:md"
