@@ -3,7 +3,8 @@
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview",
-    "lint": "eslint --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "lint:md": "markdownlint '**/*.md'",
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss}'",
     "vercel-build": "vitepress build"
@@ -28,8 +29,8 @@
     "markdown-it-mathjax3": "^4.3.2"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "yarn lint",
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "yarn lint:fix",
       "yarn format"
     ],
     "*.md": [
