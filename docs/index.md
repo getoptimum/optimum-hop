@@ -8,9 +8,9 @@ The gateway bridges your **Ethereum consensus layer (CL) client** to the **mump2
 
 ## Prerequisites
 
-- Docker and Docker Compose
-- **curl** and **jq** (used by `make init`)
-- Ports **33211**, **33212**, **43213**, **48123**, **9090**, **3000** free on the host
+* Docker and Docker Compose
+* **curl** and **jq** (used by `make init`)
+* Ports **33211**, **33212**, **43213**, **48123**, **9090**, **3000** free on the host
 
 **Hardware (same order of magnitude as the gateway quick start):** minimum about 1 vCPU, 256MB RAM, 200MB disk; more if you run a full EL/CL stack.
 
@@ -44,9 +44,9 @@ make init
 
 `make init`:
 
-- Creates `hop-hoodi/` data dirs and EL↔CL **jwt.hex**
-- Creates `.env` from `.env.example` and `config/app_conf.yml` from `sample.app_conf.yml` if missing
-- Starts the gateway and writes **GATEWAY_PEER**, **ADDR**, and **PEER_ID** into `.env` (for CL clients to peer with the gateway on the Docker network)
+* Creates `hop-hoodi/` data dirs and EL↔CL **jwt.hex**
+* Creates `.env` from `.env.example` and `config/app_conf.yml` from `sample.app_conf.yml` if missing
+* Starts the gateway and writes **GATEWAY_PEER**, **ADDR**, and **PEER_ID** into `.env` (for CL clients to peer with the gateway on the Docker network)
 
 Then start either **lite** (gateway + monitoring only) or **full** (add Geth/Prysm or another supported pair):
 
@@ -122,23 +122,23 @@ With a CL container connected, you should see **CL peers ≥ 1** in the dashboar
 
 ## Persistent data
 
-- `**hop-hoodi/`** — JWT, EL/CL datadirs (depending on profile)
-- **Named volumes** — `prometheus-data`, `grafana-data` (metrics and Grafana state)
+* `**hop-hoodi/`** — JWT, EL/CL datadirs (depending on profile)
+* **Named volumes** — `prometheus-data`, `grafana-data` (metrics and Grafana state)
 
 ## Troubleshooting
 
-- **Gateway not starting or restarting:** `docker logs optimum-gateway` and confirm `config/app_conf.yml` exists (run `make init` once so it is created from the sample if needed).
-- **CL peers stay at 0** (full stack): wait until the beacon client finishes checkpoint sync, then check `docker logs prysm-beacon` (or your CL container). Ensure you ran `make init` so `.env` contains a valid **GATEWAY_PEER** for the gateway’s libp2p address inside Docker.
-- **Port already in use (9090, 3000, 48123, …):** `make stop`, stop whatever else is bound to that port, or run `docker system prune -f` if you have leftover containers, then start again.
-- **Services show unhealthy:** often normal for the first few minutes while Geth/Prysm (or another EL/CL pair) start; use `docker compose ps` and `docker compose logs <service-name>`.
-- **Start over with chain data:** `make reset` stops, wipes the usual `hop-hoodi/` EL/CL dirs, and re-runs `init`.
+* **Gateway not starting or restarting:** `docker logs optimum-gateway` and confirm `config/app_conf.yml` exists (run `make init` once so it is created from the sample if needed).
+* **CL peers stay at 0** (full stack): wait until the beacon client finishes checkpoint sync, then check `docker logs prysm-beacon` (or your CL container). Ensure you ran `make init` so `.env` contains a valid **GATEWAY_PEER** for the gateway’s libp2p address inside Docker.
+* **Port already in use (9090, 3000, 48123, …):** `make stop`, stop whatever else is bound to that port, or run `docker system prune -f` if you have leftover containers, then start again.
+* **Services show unhealthy:** often normal for the first few minutes while Geth/Prysm (or another EL/CL pair) start; use `docker compose ps` and `docker compose logs <service-name>`.
+* **Start over with chain data:** `make reset` stops, wipes the usual `hop-hoodi/` EL/CL dirs, and re-runs `init`.
 
 ## Further reading
 
-- **[Optimum Gateway documentation (latest)](https://getoptimum.github.io/optimum-gateway/versions/latest/)** — configuration, networking, and release notes aligned with the gateway image you run here.
-- [Geth](https://geth.ethereum.org/docs/)
-- [Prysm](https://docs.prylabs.network/)
-- [Teku](https://docs.teku.consensys.net/)
-- [Lighthouse](https://lighthouse-book.sigmaprime.io/)
-- [Prometheus](https://prometheus.io/docs/) · [Grafana](https://grafana.com/docs/)
+* **[Optimum Gateway documentation (latest)](https://getoptimum.github.io/optimum-gateway/versions/latest/)** — configuration, networking, and release notes aligned with the gateway image you run here.
+* [Geth](https://geth.ethereum.org/docs/)
+* [Prysm](https://docs.prylabs.network/)
+* [Teku](https://docs.teku.consensys.net/)
+* [Lighthouse](https://lighthouse-book.sigmaprime.io/)
+* [Prometheus](https://prometheus.io/docs/) · [Grafana](https://grafana.com/docs/)
 

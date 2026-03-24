@@ -12,6 +12,6 @@ It’s the quickest way to experiment with **mumP2P** without manual setup.
 ## Docs site (this repository)
 
 ```bash
-npm ci          # or: npm install
+yarn install --frozen-lockfile
 make run-dev    # VitePress dev server; use make build for production build
 ```

@@ -1,25 +1,25 @@
 #!/usr/bin/make -f
 
-NPM := npm
+YARN := $(shell which yarn)
 
 run-dev:
 	@echo "⚙️  Running development server..."
-	@$(NPM) run docs:dev
+	@$(YARN) docs:dev
 
 build:
 	@echo "🚀  Building static site..."
-	@$(NPM) run docs:build
+	@$(YARN) docs:build
 
 preview:
 	@echo "🔍  Previewing production build..."
-	@$(NPM) run docs:preview
+	@$(YARN) docs:preview
 
 lint:
 	@echo "🧹  Linting..."
-	@$(NPM) run lint
+	@$(YARN) lint
 
 lint-markdown:
 	@echo "🧹  Linting markdown..."
-	@$(NPM) run lint:md
+	@$(YARN) lint:md
 
 .PHONY: run-dev build preview lint lint-markdown

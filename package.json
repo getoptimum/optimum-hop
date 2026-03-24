@@ -29,11 +29,12 @@
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
+      "yarn lint",
+      "yarn format"
     ],
     "*.md": [
-      "markdownlint"
+      "yarn lint:md"
     ]
-  }
+  },
+  "packageManager": "yarn@1.22.22"
 }
