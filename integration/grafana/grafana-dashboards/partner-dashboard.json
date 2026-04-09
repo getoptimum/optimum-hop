@@ -338,7 +338,7 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "optp2p_gateway_optimum_gateway_opt_peers{gateway_id=\"$gateway\"}",
+          "expr": "optp2p_gateway_optimum_gateway_mump2p_peers{gateway_id=\"$gateway\"}",
           "hide": false,
           "instant": false,
           "legendFormat": "mump2p Peers",
