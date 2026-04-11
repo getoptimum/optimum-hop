@@ -15,3 +15,7 @@ It’s the quickest way to experiment with **mumP2P** without manual setup.
 yarn install --frozen-lockfile
 make run-dev    # VitePress dev server; use make build for production build
 ```
+
+## License
+
+This project is licensed under the [GNU General Public License v3.0](LICENSE).

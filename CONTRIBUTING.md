@@ -2,6 +2,10 @@
 
 Thanks for your interest in contributing. This guide covers the workflow and conventions we follow.
 
+## License
+
+This repository is released under the [GNU General Public License v3.0](LICENSE). By submitting a contribution, you agree that your contribution is licensed under that same license.
+
 ## Getting started
 
 1. **Fork** the repository and clone your fork.
