@@ -1,24 +1,22 @@
-name: Docs (build, lint, deploy)
+name: Docs
 
 on:
+  pull_request:
   push:
     branches:
       - main
       - 'releases/**'
 
 concurrency:
-  group: docs-${{ github.ref }}
+  group: docs-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
-  build-and-deploy:
-    name: Docs - Lint, Build & Deploy
+  build:
+    name: Lint & build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout
@@ -27,7 +25,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '23'
+          node-version: '24'
           cache: 'yarn'
           cache-dependency-path: yarn.lock
 
@@ -39,18 +37,44 @@ jobs:
 
       - name: Lint markdown
         run: make lint-markdown
-        
 
       - name: Build VitePress
         env:
           BASE: /${{ github.event.repository.name }}/
         run: make build
 
+      - name: Upload dist for GitHub Pages
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitepress-dist
+          path: .vitepress/dist
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Download build output
+        uses: actions/download-artifact@v4
+        with:
+          name: vitepress-dist
+          path: site
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .vitepress/dist
+          path: site
 
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main'
+        id: deployment
         uses: actions/deploy-pages@v4

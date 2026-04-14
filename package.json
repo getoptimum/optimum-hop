@@ -1,9 +1,11 @@
 {
+  "license": "GPL-3.0",
   "scripts": {
     "docs:dev": "vitepress dev",
     "docs:build": "vitepress build",
     "docs:preview": "vitepress preview",
-    "lint": "eslint --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix .",
     "lint:md": "markdownlint '**/*.md'",
     "format": "prettier --write '**/*.{js,jsx,ts,tsx,json,css,scss}'",
     "vercel-build": "vitepress build"
@@ -28,9 +30,9 @@
     "markdown-it-mathjax3": "^4.3.2"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "yarn lint",
-      "yarn format"
+    "*.{js,jsx,ts,tsx,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
     ],
     "*.md": [
       "yarn lint:md"
