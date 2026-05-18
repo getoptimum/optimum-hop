@@ -137,12 +137,17 @@ services:
     command:
       - --network=hoodi
       - --data-base-path=/teku-data
+      - --data-storage-mode=prune
       - --checkpoint-sync-url=https://hoodi.beaconstate.info
-      - --ee-endpoint=http://execution:8551       # Connect to Geth EL
+      - --ee-endpoint=http://execution:8551
       - --ee-jwt-secret-file=/jwt.hex
+      - --log-destination=CONSOLE
+      - --logging=INFO
       - --p2p-enabled=true
       - --p2p-discovery-enabled=true
       - --p2p-port=13000
+      - --p2p-subscribe-all-subnets-enabled
+      - --p2p-subscribe-all-custody-subnets-enabled
       - --metrics-enabled=true
       - --metrics-host-allowlist=*
       - --metrics-interface=0.0.0.0
@@ -151,7 +156,10 @@ services:
       - --rest-api-port=3500
       - --rest-api-host-allowlist=*
       - --validators-proposer-default-fee-recipient=0x0000000000000000000000000000000000000000
-      - --p2p-direct-peers=${GATEWAY_PEER}   # Connect to Optimum Gateway
+      - --validators-builder-registration-default-enabled
+      - --validators-graffiti-client-append-format=DISABLED
+      - --p2p-direct-peers=${GATEWAY_PEER}
+      - --p2p-static-peers=${GATEWAY_PEER}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3500/eth/v1/node/health"]
       interval: 30s
