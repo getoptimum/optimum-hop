@@ -9,7 +9,3 @@ telemetry_port: 48123
 enable_aggregation: true
 gateway_cluster_id: optimum_hoodi_v0_3
 gateway_id: local-dockerized
-
-# Topic names only
-eth_topics_subscribe:
-  - beacon_block
