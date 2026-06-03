@@ -5,7 +5,7 @@ Local development and testing setup for the Optimum Gateway with Ethereum EL/CL 
 ## Prerequisites
 
 * Docker and Docker Compose installed
-* Ports 33211, 33212, 43213, 48123, 9090, 3000 available
+* Ports available: gateway `33211`, `33212`, `48123`; monitoring `9090`, `3000` (lite/full); CL-specific ports below
 
 ## Setup
 
@@ -21,62 +21,73 @@ This will:
 * Start the Optimum Gateway and fetch its peer info
 * Write `GATEWAY_PEER`, `ADDR`, and `PEER_ID` to `.env`
 
+`GATEWAY_PEER` is used by CL clients (Prysm `--peer`, Teku/Lighthouse/Nimbus direct peer flags).
+
 ## Running the Stack
 
 ### With Makefile
 
 | Command | Description |
 |---------|-------------|
-| `make init` | Initialize project, generate jwt, discover GATEWAY_PEER |
-| `make run` | Run Geth + Prysm + Monitoring |
-| `make run_teku` | Run Nethermind + Teku + Monitoring |
-| `make run_lighthouse` | Run Nethermind + Lighthouse + Monitoring |
-| `make run_prysm` | Run Nethermind + Prysm + Monitoring |
-| `make lite` | Run Gateway + Metrics only (no EL/CL) |
+| `make init` | Initialize project, generate jwt, discover `GATEWAY_PEER` |
+| `make run` | Geth + Prysm + monitoring |
+| `make run_prysm` | Nethermind + Prysm + monitoring |
+| `make run_teku` | Nethermind + Teku + monitoring |
+| `make run_lighthouse` | Nethermind + Lighthouse + monitoring |
+| `make run_nimbus` | Nethermind + Nimbus + monitoring |
+| `make lite` | Gateway + monitoring only (no EL/CL) |
 | `make stop` | Stop all services |
-| `make reset` | Wipe all data and re-init |
-| `make clean` | Stop services and remove all data + containers |
+| `make reset` | Wipe data dirs and re-init |
+| `make clean` | Stop services and remove local data |
+
+If port `9090` is already in use, run without the monitoring profile:
+
+```bash
+docker compose --profile nethermind --profile nimbus up -d
+```
 
 ### With Docker Compose
 
-#### Geth + Prysm + Monitoring
+| Stack | Command |
+|-------|---------|
+| Geth + Prysm | `docker compose --profile full --profile geth --profile prysm up -d` |
+| Nethermind + Prysm | `docker compose --profile full --profile nethermind --profile prysm up -d` |
+| Nethermind + Teku | `docker compose --profile full --profile nethermind --profile teku up -d` |
+| Nethermind + Lighthouse | `docker compose --profile full --profile nethermind --profile lighthouse up -d` |
+| Nethermind + Nimbus | `docker compose --profile full --profile nethermind --profile nimbus up -d` |
+| Gateway only | `docker compose --profile lite up -d` |
 
-```bash
-docker compose --profile full --profile geth --profile prysm up -d
+## CL client notes
+
+| Client | Gateway connection | Local REST (host) |
+|--------|-------------------|-------------------|
+| Prysm | `--peer=${GATEWAY_PEER}` | `http://localhost:3500` |
+| Teku | `--p2p-direct-peers=${GATEWAY_PEER}` | `http://localhost:3500` |
+| Lighthouse | `--trusted-peers=${PEER_ID}` + `--boot-nodes=${ADDR}` | `http://localhost:5052` |
+| Nimbus | `--direct-peer=${GATEWAY_PEER}` | `http://localhost:13500` (maps container `3500`) |
+
+Nimbus P2P is published on host ports `19000` (tcp/udp) to avoid clashes with other CL stacks.
+
+Optional: add Nimbus to gateway `config/app_conf.yml` after it is running:
+
+```yaml
+direct_cl_peers:
+  - /ip4/172.29.0.2/tcp/19000/p2p/<NIMBUS_PEER_ID>
 ```
 
-#### Nethermind + Teku + Monitoring
+Get `<NIMBUS_PEER_ID>` from:
 
 ```bash
-docker compose --profile full --profile nethermind --profile teku up -d
+curl -s http://localhost:13500/eth/v1/node/identity | jq -r '.data.peer_id'
 ```
 
-#### Nethermind + Lighthouse + Monitoring
-
-```bash
-docker compose --profile full --profile nethermind --profile lighthouse up -d
-```
-
-#### Gateway + Metrics only (lite mode)
-
-```bash
-docker compose --profile lite up -d
-```
+Use the Docker network address from `p2p_addresses` (not `127.0.0.1`), then restart the gateway.
 
 ## Configuration
 
-Gateway config is in `ethereum/config/app_conf.yml` (copied from `sample.app_conf.yml` on first run).
+Gateway config: `ethereum/config/app_conf.yml` (created from `config/sample.app_conf.yml` on first `make init`).
 
-Key settings:
-
-```yaml
-gateway_cluster_id: optimum_hoodi_v0_3
-gateway_id: local-dockerized
-eth_topics_subscribe:
-  - beacon_block
-```
-
-Currently only `beacon_block` is supported. Attestation subnets will be added in RC12.
+Image versions and `GATEWAY_PEER` live in `ethereum/.env` (from `.env.example`).
 
 ## Monitoring
 
@@ -86,74 +97,50 @@ Currently only `beacon_block` is supported. Attestation subnets will be added in
 | Grafana | http://localhost:3000 (admin/admin) |
 | Gateway API | http://localhost:48123 |
 
-Prometheus scrapes the gateway at `optimum-gateway:48123` (docker network). The Partner Dashboard is auto-provisioned in Grafana.
-
 ## Verify
 
 ```bash
-# Gateway version
-curl -s http://localhost:48123/api/v1/version
+# Gateway health and peers
+curl -s http://localhost:48123/health | jq '{status, checks: .checks.cl_peers}'
+curl -s http://localhost:48123/api/v1/self_info | jq '{peer_id, libp2p: .libp2p.total_peers}'
 
-# Gateway self info (peer ID, multiaddrs)
-curl -s http://localhost:48123/api/v1/self_info | jq .
-
-# Metrics
-curl -s http://localhost:48123/metrics | grep optp2p_gateway
+# Nimbus sees gateway (after make run_nimbus)
+curl -s http://localhost:13500/eth/v1/node/peers/$(grep PEER_ID .env | cut -d= -f2) | jq '.data | {state, agent}'
 ```
 
-When CL is connected: `cl_peers` ≥ 1, `libp2p_total_messages` increments.
+When CL is connected: gateway `checks.cl_peers` ≥ 1 and Nimbus peer `state` is `connected` (brief `disconnected` can occur during churn).
 
 ## Structure
 
 ```text
 integration/
+├── README.md
 ├── ethereum/
-│   ├── docker-compose.yml      # Full stack: gateway + EL + CL + monitoring
-│   ├── Makefile                # Convenience targets
+│   ├── docker-compose.yml
+│   ├── Makefile
 │   ├── config/
-│   │   └── sample.app_conf.yml # Gateway config template
-│   ├── .env.example            # Environment variables (versions, peer info)
-│   └── prysm.sh               # JWT generation helper
+│   │   └── sample.app_conf.yml
+│   ├── .env.example
+│   └── prysm.sh
 └── grafana/
     ├── prometheus/
-    │   ├── prometheus.yml      # Prometheus scrape config
-    │   └── targets.json        # Scrape targets (gateway)
     ├── grafana-provisioning/
-    │   ├── datasources/
-    │   │   └── prometheus.yaml # Auto-provisioned Prometheus datasource
-    │   └── dashboards/
-    │       └── dashboards.yml  # Dashboard provisioning config
     └── grafana-dashboards/
-        └── partner-dashboard.json  # Partner Dashboard (auto-loaded)
 ```
 
 ## Important Notes
 
-* Only one EL profile should be active at a time (geth or nethermind)
-* Only one CL profile should be active at a time (prysm, teku, or lighthouse)
-* GATEWAY_PEER, ADDR and PEER_ID are populated automatically during `make init`
-* If you run into sync issues, try `make reset` to wipe state and re-init
+* Only one EL profile at a time (`geth` or `nethermind`)
+* Only one CL profile at a time (`prysm`, `teku`, `lighthouse`, or `nimbus`)
+* `GATEWAY_PEER`, `ADDR`, and `PEER_ID` are set by `make init`
+* Sync issues: `make reset`
 
 ## Troubleshooting
 
-### Gateway Connection Issues
-
 ```bash
 docker logs optimum-gateway
+docker logs nimbus
+make stop && docker compose --profile nethermind --profile nimbus up -d   # skip monitoring if 9090 busy
 ```
 
-### Port Conflicts
-
-```bash
-make stop && docker system prune -f
-```
-
-### Services Unhealthy
-
-Normal during startup, wait 2-3 minutes for full synchronization.
-
-### Fresh Start
-
-```bash
-make reset
-```
+Nimbus startup can take several minutes (genesis/checkpoint). Gateway bootstrap errors to remote mump2p nodes during local dev are expected if outbound mesh is unreachable.

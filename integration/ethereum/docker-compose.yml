@@ -7,7 +7,7 @@ services:
     image: getoptimum/gateway:${GATEWAY_VERSION}   # Use version from env var
     container_name: optimum-gateway
     restart: unless-stopped
-    profiles: ["lite", "full", "geth", "nethermind", "teku", "prysm", "lighthouse"]
+    profiles: ["lite", "full", "geth", "nethermind", "teku", "prysm", "lighthouse", "nimbus"]
     ports:
       - "33211:33211"         # sidecar gRPC (mump2p tracer)
       - "33212:33212"         # libp2p port (CL clients connect here)
@@ -165,6 +165,50 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    networks:
+      - hop-hoodi-testnet
+
+  nimbus:
+    image: statusim/nimbus-eth2:${NIMBUS_VERSION:-multiarch-v26.5.0}
+    container_name: nimbus
+    restart: unless-stopped
+    profiles: ["nimbus"]
+    volumes:
+      - ./hop-hoodi/nimbus-data:/data
+      - ./hop-hoodi/jwt.hex:/data/jwt.hex
+    command:
+      - --network=hoodi
+      - --data-dir=/data
+      - --graffiti=Optimum/Nimbus
+      - --el=http://execution:8551
+      - --jwt-secret=/data/jwt.hex
+      - --listen-address=0.0.0.0
+      - --tcp-port=19000
+      - --udp-port=19000
+      - --max-peers=50
+      - --metrics=true
+      - --metrics-address=0.0.0.0
+      - --metrics-port=8008
+      - --rest=true
+      - --rest-port=3500
+      - --rest-address=0.0.0.0
+      - --rest-allow-origin=*
+      - --external-beacon-api-url=https://hoodi.beaconstate.info
+      - --doppelganger-detection=false
+      - --light-client-data-serve=false
+      - --validator-monitor-auto=false
+      - --direct-peer=${GATEWAY_PEER}
+    ports:
+      - "13500:3500"
+      - "19000:19000/tcp"
+      - "19000:19000/udp"
+      - "18008:8008"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3500/eth/v1/node/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
     networks:
       - hop-hoodi-testnet
 
