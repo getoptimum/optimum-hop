@@ -21,7 +21,7 @@ This will:
 * Start the Optimum Gateway and fetch its peer info
 * Write `GATEWAY_PEER`, `ADDR`, and `PEER_ID` to `.env`
 
-`GATEWAY_PEER` is used by CL clients (Prysm `--peer`, Teku/Lighthouse/Nimbus direct peer flags).
+`GATEWAY_PEER` is used by CL clients (Prysm `--peer`, Teku/Lighthouse/Nimbus/Lodestar direct peer flags).
 
 ## Running the Stack
 
@@ -35,6 +35,7 @@ This will:
 | `make run_teku` | Nethermind + Teku + monitoring |
 | `make run_lighthouse` | Nethermind + Lighthouse + monitoring |
 | `make run_nimbus` | Nethermind + Nimbus + monitoring |
+| `make run_lodestar` | Nethermind + Lodestar + monitoring |
 | `make lite` | Gateway + monitoring only (no EL/CL) |
 | `make stop` | Stop all services |
 | `make reset` | Wipe data dirs and re-init |
@@ -55,6 +56,7 @@ docker compose --profile nethermind --profile nimbus up -d
 | Nethermind + Teku | `docker compose --profile full --profile nethermind --profile teku up -d` |
 | Nethermind + Lighthouse | `docker compose --profile full --profile nethermind --profile lighthouse up -d` |
 | Nethermind + Nimbus | `docker compose --profile full --profile nethermind --profile nimbus up -d` |
+| Nethermind + Lodestar | `docker compose --profile full --profile nethermind --profile lodestar up -d` |
 | Gateway only | `docker compose --profile lite up -d` |
 
 ## CL client notes
@@ -65,8 +67,9 @@ docker compose --profile nethermind --profile nimbus up -d
 | Teku | `--p2p-direct-peers=${GATEWAY_PEER}` | `http://localhost:3500` |
 | Lighthouse | `--trusted-peers=${PEER_ID}` + `--boot-nodes=${ADDR}` | `http://localhost:5052` |
 | Nimbus | `--direct-peer=${GATEWAY_PEER}` | `http://localhost:13500` (maps container `3500`) |
+| Lodestar | `--directPeers=${GATEWAY_PEER}` | `http://localhost:9596` |
 
-Nimbus P2P is published on host ports `19000` (tcp/udp) to avoid clashes with other CL stacks.
+Nimbus P2P is published on host ports `19000` (tcp/udp). Lodestar P2P uses `19001` (tcp/udp) to avoid clashes with Lighthouse on `9000`.
 
 Optional: add Nimbus to gateway `config/app_conf.yml` after it is running:
 
@@ -82,6 +85,17 @@ curl -s http://localhost:13500/eth/v1/node/identity | jq -r '.data.peer_id'
 ```
 
 Use the Docker network address from `p2p_addresses` (not `127.0.0.1`), then restart the gateway.
+
+Optional: add Lodestar to gateway `config/app_conf.yml` after `make run_lodestar`:
+
+```yaml
+direct_cl_peers:
+  - /ip4/172.29.0.x/tcp/19001/p2p/<LODESTAR_PEER_ID>
+```
+
+```bash
+curl -s http://localhost:9596/eth/v1/node/identity | jq -r '.data.p2p_addresses[0]'
+```
 
 ## Configuration
 
@@ -106,9 +120,12 @@ curl -s http://localhost:48123/api/v1/self_info | jq '{peer_id, libp2p: .libp2p.
 
 # Nimbus sees gateway (after make run_nimbus)
 curl -s http://localhost:13500/eth/v1/node/peers/$(grep PEER_ID .env | cut -d= -f2) | jq '.data | {state, agent}'
+
+# Lodestar sees gateway (after make run_lodestar)
+curl -s http://localhost:9596/eth/v1/node/peers/$(grep PEER_ID .env | cut -d= -f2) | jq '.data | {state, agent}'
 ```
 
-When CL is connected: gateway `checks.cl_peers` ≥ 1 and Nimbus peer `state` is `connected` (brief `disconnected` can occur during churn).
+When CL is connected: gateway `checks.cl_peers` ≥ 1 and CL peer `state` is `connected` (brief `disconnected` can occur during churn).
 
 ## Structure
 
@@ -131,7 +148,7 @@ integration/
 ## Important Notes
 
 * Only one EL profile at a time (`geth` or `nethermind`)
-* Only one CL profile at a time (`prysm`, `teku`, `lighthouse`, or `nimbus`)
+* Only one CL profile at a time (`prysm`, `teku`, `lighthouse`, `nimbus`, or `lodestar`)
 * `GATEWAY_PEER`, `ADDR`, and `PEER_ID` are set by `make init`
 * Sync issues: `make reset`
 
@@ -140,7 +157,8 @@ integration/
 ```bash
 docker logs optimum-gateway
 docker logs nimbus
-make stop && docker compose --profile nethermind --profile nimbus up -d   # skip monitoring if 9090 busy
+docker logs lodestar
+make stop && docker compose --profile nethermind --profile lodestar up -d   # skip monitoring if 9090 busy
 ```
 
-Nimbus startup can take several minutes (genesis/checkpoint). Gateway bootstrap errors to remote mump2p nodes during local dev are expected if outbound mesh is unreachable.
+CL startup can take several minutes (checkpoint sync). Gateway bootstrap errors to remote mump2p nodes during local dev are expected if outbound mesh is unreachable.

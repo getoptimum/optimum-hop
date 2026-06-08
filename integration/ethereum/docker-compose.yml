@@ -7,7 +7,7 @@ services:
     image: getoptimum/gateway:${GATEWAY_VERSION}   # Use version from env var
     container_name: optimum-gateway
     restart: unless-stopped
-    profiles: ["lite", "full", "geth", "nethermind", "teku", "prysm", "lighthouse", "nimbus"]
+    profiles: ["lite", "full", "geth", "nethermind", "teku", "prysm", "lighthouse", "nimbus", "lodestar"]
     ports:
       - "33211:33211"         # sidecar gRPC (mump2p tracer)
       - "33212:33212"         # libp2p port (CL clients connect here)
@@ -205,6 +205,45 @@ services:
       - "18008:8008"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3500/eth/v1/node/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 120s
+    networks:
+      - hop-hoodi-testnet
+
+  lodestar:
+    image: chainsafe/lodestar:${LODESTAR_VERSION:-v1.43.0}
+    container_name: lodestar
+    restart: unless-stopped
+    profiles: ["lodestar"]
+    volumes:
+      - ./hop-hoodi/lodestar-data:/data
+      - ./hop-hoodi/jwt.hex:/jwt.hex
+    command:
+      - beacon
+      - --network=hoodi
+      - --dataDir=/data
+      - --checkpointSyncUrl=https://hoodi.beaconstate.info
+      - --execution.urls=http://execution:8551
+      - --jwtSecret=/jwt.hex
+      - --rest.address=0.0.0.0
+      - --rest.port=9596
+      - --listenAddress=0.0.0.0
+      - --port=19001
+      - --discoveryPort=19001
+      - --metrics
+      - --metrics.address=0.0.0.0
+      - --metrics.port=8008
+      - --subscribeAllSubnets
+      - --directPeers=${GATEWAY_PEER}
+    ports:
+      - "9596:9596"             # REST API
+      - "19001:19001/tcp"       # P2P TCP (avoid :9000 clash with Lighthouse)
+      - "19001:19001/udp"       # P2P UDP (discv5)
+      - "19008:8008"            # Metrics
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9596/eth/v1/node/health"]
       interval: 30s
       timeout: 5s
       retries: 5

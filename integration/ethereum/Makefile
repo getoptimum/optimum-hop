@@ -3,6 +3,7 @@ ETHEREUM_KEY_DIR := ${PWD}/hop-hoodi/ethereum
 GETH_DATA_DIR := ${PWD}/hop-hoodi/geth-data
 PRYSM_DATA_DIR := ${PWD}/hop-hoodi/prysm-data
 NIMBUS_DATA_DIR := ${PWD}/hop-hoodi/nimbus-data
+LODESTAR_DATA_DIR := ${PWD}/hop-hoodi/lodestar-data
 JWT_SECRET_FILE := ${PWD}/hop-hoodi/jwt.hex
 ENV_FILE := .env
 ENV_EXAMPLE := .env.example
@@ -16,6 +17,7 @@ init: stop ## Initialize project and set GATEWAY_PEER in .env
 	mkdir -p ${ETHEREUM_KEY_DIR}
 	mkdir -p ${GETH_DATA_DIR}
 	mkdir -p ${PRYSM_DATA_DIR}
+	mkdir -p ${LODESTAR_DATA_DIR}
 	@echo "Create jwt secret"
 	@chmod +x prysm.sh
 	@./prysm.sh beacon-chain generate-auth-secret
@@ -54,6 +56,8 @@ reset: stop ## Reset project for re-init prysm
 	rm -rf ${GETH_DATA_DIR}
 	rm -rf ${PRYSM_DATA_DIR}
 	rm -rf ${NIMBUS_DATA_DIR}
+	rm -rf ${LODESTAR_DATA_DIR}
+	rm -f ./identity/libp2p/p2p.key
 	$(MAKE) init
 
 stop: ## Stop compose services
@@ -72,6 +76,7 @@ clean: stop ## Stop services and remove all data + env
 	rm -rf ${GETH_DATA_DIR}
 	rm -rf ${PRYSM_DATA_DIR}
 	rm -rf ${NIMBUS_DATA_DIR}
+	rm -rf ${LODESTAR_DATA_DIR}
 	rm -f ${JWT_SECRET_FILE}
 
 # ============================================================
@@ -98,9 +103,13 @@ run_nimbus: stop ## Run full stack with Nethermind + Nimbus + monitoring
 	@echo "Running ${PROJECT_NAME} (Nethermind + Nimbus + Monitoring)..."
 	docker compose --profile full --profile nethermind --profile nimbus up --build -d
 
+run_lodestar: stop ## Run full stack with Nethermind + Lodestar + monitoring
+	@echo "Running ${PROJECT_NAME} (Nethermind + Lodestar + Monitoring)..."
+	docker compose --profile full --profile nethermind --profile lodestar up --build -d
+
 lite: stop ## Run Gateway + Monitoring only (no EL/CL)
 	@echo "Running ${PROJECT_NAME} (lite mode: Gateway + Metrics only)..."
 	docker compose --profile lite up --build -d
 
-.PHONY: help stop run reset run_teku run_lighthouse run_prysm run_nimbus lite clean
+.PHONY: help stop run reset run_teku run_lighthouse run_prysm run_nimbus run_lodestar lite clean
 .DEFAULT_GOAL := help
