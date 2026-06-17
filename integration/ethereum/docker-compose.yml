@@ -9,7 +9,6 @@ services:
     restart: unless-stopped
     profiles: ["lite", "full", "geth", "nethermind", "teku", "prysm", "lighthouse", "nimbus", "lodestar"]
     ports:
-      - "33211:33211"         # sidecar gRPC (mump2p tracer)
       - "33212:33212"         # libp2p port (CL clients connect here)
       - "43213:43213"         # mump2p agent port
       - "48123:48123"         # Telemetry/metrics port

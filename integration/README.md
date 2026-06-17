@@ -5,7 +5,7 @@ Local development and testing setup for the Optimum Gateway with Ethereum EL/CL 
 ## Prerequisites
 
 * Docker and Docker Compose installed
-* Ports available: gateway `33211`, `33212`, `48123`; monitoring `9090`, `3000` (lite/full); CL-specific ports below
+* Ports available: gateway `33212`, `48123`; monitoring `9090`, `3000` (lite/full); CL-specific ports below
 
 ## Setup
 
@@ -27,19 +27,19 @@ This will:
 
 ### With Makefile
 
-| Command | Description |
-|---------|-------------|
-| `make init` | Initialize project, generate jwt, discover `GATEWAY_PEER` |
-| `make run` | Geth + Prysm + monitoring |
-| `make run_prysm` | Nethermind + Prysm + monitoring |
-| `make run_teku` | Nethermind + Teku + monitoring |
-| `make run_lighthouse` | Nethermind + Lighthouse + monitoring |
-| `make run_nimbus` | Nethermind + Nimbus + monitoring |
-| `make run_lodestar` | Nethermind + Lodestar + monitoring |
-| `make lite` | Gateway + monitoring only (no EL/CL) |
-| `make stop` | Stop all services |
-| `make reset` | Wipe data dirs and re-init |
-| `make clean` | Stop services and remove local data |
+| Command               | Description                                               |
+| --------------------- | --------------------------------------------------------- |
+| `make init`           | Initialize project, generate jwt, discover `GATEWAY_PEER` |
+| `make run`            | Geth + Prysm + monitoring                                 |
+| `make run_prysm`      | Nethermind + Prysm + monitoring                           |
+| `make run_teku`       | Nethermind + Teku + monitoring                            |
+| `make run_lighthouse` | Nethermind + Lighthouse + monitoring                      |
+| `make run_nimbus`     | Nethermind + Nimbus + monitoring                          |
+| `make run_lodestar`   | Nethermind + Lodestar + monitoring                        |
+| `make lite`           | Gateway + monitoring only (no EL/CL)                      |
+| `make stop`           | Stop all services                                         |
+| `make reset`          | Wipe data dirs and re-init                                |
+| `make clean`          | Stop services and remove local data                       |
 
 If port `9090` is already in use, run without the monitoring profile:
 
@@ -49,25 +49,25 @@ docker compose --profile nethermind --profile nimbus up -d
 
 ### With Docker Compose
 
-| Stack | Command |
-|-------|---------|
-| Geth + Prysm | `docker compose --profile full --profile geth --profile prysm up -d` |
-| Nethermind + Prysm | `docker compose --profile full --profile nethermind --profile prysm up -d` |
-| Nethermind + Teku | `docker compose --profile full --profile nethermind --profile teku up -d` |
+| Stack                   | Command                                                                         |
+| ----------------------- | ------------------------------------------------------------------------------- |
+| Geth + Prysm            | `docker compose --profile full --profile geth --profile prysm up -d`            |
+| Nethermind + Prysm      | `docker compose --profile full --profile nethermind --profile prysm up -d`      |
+| Nethermind + Teku       | `docker compose --profile full --profile nethermind --profile teku up -d`       |
 | Nethermind + Lighthouse | `docker compose --profile full --profile nethermind --profile lighthouse up -d` |
-| Nethermind + Nimbus | `docker compose --profile full --profile nethermind --profile nimbus up -d` |
-| Nethermind + Lodestar | `docker compose --profile full --profile nethermind --profile lodestar up -d` |
-| Gateway only | `docker compose --profile lite up -d` |
+| Nethermind + Nimbus     | `docker compose --profile full --profile nethermind --profile nimbus up -d`     |
+| Nethermind + Lodestar   | `docker compose --profile full --profile nethermind --profile lodestar up -d`   |
+| Gateway only            | `docker compose --profile lite up -d`                                           |
 
 ## CL client notes
 
-| Client | Gateway connection | Local REST (host) |
-|--------|-------------------|-------------------|
-| Prysm | `--peer=${GATEWAY_PEER}` | `http://localhost:3500` |
-| Teku | `--p2p-direct-peers=${GATEWAY_PEER}` | `http://localhost:3500` |
-| Lighthouse | `--trusted-peers=${PEER_ID}` + `--boot-nodes=${ADDR}` | `http://localhost:5052` |
-| Nimbus | `--direct-peer=${GATEWAY_PEER}` | `http://localhost:13500` (maps container `3500`) |
-| Lodestar | `--directPeers=${GATEWAY_PEER}` | `http://localhost:9596` |
+| Client     | Gateway connection                                    | Local REST (host)                                |
+| ---------- | ----------------------------------------------------- | ------------------------------------------------ |
+| Prysm      | `--peer=${GATEWAY_PEER}`                              | `http://localhost:3500`                          |
+| Teku       | `--p2p-direct-peers=${GATEWAY_PEER}`                  | `http://localhost:3500`                          |
+| Lighthouse | `--trusted-peers=${PEER_ID}` + `--boot-nodes=${ADDR}` | `http://localhost:5052`                          |
+| Nimbus     | `--direct-peer=${GATEWAY_PEER}`                       | `http://localhost:13500` (maps container `3500`) |
+| Lodestar   | `--directPeers=${GATEWAY_PEER}`                       | `http://localhost:9596`                          |
 
 Nimbus P2P is published on host ports `19000` (tcp/udp). Lodestar P2P uses `19001` (tcp/udp) to avoid clashes with Lighthouse on `9000`.
 
@@ -105,11 +105,11 @@ Image versions and `GATEWAY_PEER` live in `ethereum/.env` (from `.env.example`).
 
 ## Monitoring
 
-| Service | URL |
-|---------|-----|
-| Prometheus | http://localhost:9090 |
-| Grafana | http://localhost:3000 (admin/admin) |
-| Gateway API | http://localhost:48123 |
+| Service     | URL                                   |
+| ----------- | ------------------------------------- |
+| Prometheus  | <http://localhost:9090>               |
+| Grafana     | <http://localhost:3000> (admin/admin) |
+| Gateway API | <http://localhost:48123>              |
 
 ## Verify
 
