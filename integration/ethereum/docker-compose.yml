@@ -93,7 +93,7 @@ services:
   # GATEWAY_PEER is split during make init into ADDR + PEER_ID
   # ========================================================
   prysm-beacon:
-    image: gcr.io/prysmaticlabs/prysm/beacon-chain:${PRYSM_VERSION:-stable}
+    image: gcr.io/offchainlabs/prysm/beacon-chain:${PRYSM_VERSION:-v7.1.4}
     container_name: prysm-beacon
     restart: unless-stopped
     profiles: ["prysm"]
@@ -251,7 +251,7 @@ services:
       - hop-hoodi-testnet
 
   lighthouse:
-    image: sigp/lighthouse:${LIGHTHOUSE_VERSION:-v7.1.0}
+    image: sigp/lighthouse:${LIGHTHOUSE_VERSION:-v8.2.0}
     profiles: ["lighthouse"]
     restart: unless-stopped
     ports:
@@ -273,8 +273,10 @@ services:
       --metrics-address=0.0.0.0
       --metrics-port=5054
       --metrics-allow-origin="*"
-      --libp2p-addresses=${ADDR}
+      --boot-nodes=${ADDR}
       --trusted-peers=${PEER_ID}
+      --semi-supernode
+      --target-peers=500
     volumes:
       - ./hop-hoodi/lighthouse-data:/lighthouse-data
       - ./hop-hoodi/jwt.hex:/jwt/jwt.hex
