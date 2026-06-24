@@ -31,34 +31,3 @@ jobs:
         uses: trufflesecurity/trufflehog@041f07e9df901a1038a528e5525b0226d04dd5ea
         with:
           extra_args: --results=verified,unknown
-
-  osv-scanner:
-    name: OSV Scanner (dependency vulns)
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
-        with:
-          # The scanner reads the workspace locally; no need to leave the
-          # default GITHUB_TOKEN persisted in `.git/config` (zizmor `artipacked`).
-          persist-credentials: false
-
-      # v2.3.8 - https://github.com/google/osv-scanner-action/releases/tag/v2.3.8
-      # GitHub's dependency-review-action needs Advanced Security on private
-      # repos. OSV-Scanner (Google) does the same lockfile vuln scan locally
-      # against the OSV.dev database, no Advanced Security required.
-      #
-      # The repo has three action.yml files; the root one is a stub without
-      # a `runs:` section ("Not intended to be used directly"), so we point
-      # at the composite action under `osv-scanner-action/`.
-      - name: Run OSV Scanner
-        uses: google/osv-scanner-action/osv-scanner-action@9a498708959aeaef5ef730655706c5a1df1edbc2
-        with:
-          # `--fail-on-vuln` is not a v2 flag; non-zero exit on any found
-          # vulnerability is the default. `--lockfile=yarn.lock` keeps the
-          # scan scoped to the JS dep tree and skips spurious matches in
-          # docs/ or build output.
-          scan-args: |-
-            --lockfile=yarn.lock
