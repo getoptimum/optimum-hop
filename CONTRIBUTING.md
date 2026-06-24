@@ -23,11 +23,11 @@ yarn install --frozen-lockfile
 
 ## Branch naming
 
-| Prefix | Use |
-|---|---|
-| `feat/` | New feature or enhancement |
-| `fix/` | Bug fix |
-| `docs/` | Documentation only |
+| Prefix   | Use                             |
+| -------- | ------------------------------- |
+| `feat/`  | New feature or enhancement      |
+| `fix/`   | Bug fix                         |
+| `docs/`  | Documentation only              |
 | `chore/` | Tooling, CI, dependency updates |
 
 ## Development
