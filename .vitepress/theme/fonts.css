@@ -1,10 +1,7 @@
 @import '@fontsource-variable/geist/index.css';
+@import '@fontsource-variable/geist-mono/index.css';
 
 :root {
   --vp-font-family-base: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
-  --vp-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-}
-
-:where(h1, h2, h3, h4, h5, h6, .VPHero .name, .VPHero .text) {
-  font-family: 'ABC Diatype', 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --vp-font-family-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
 }
