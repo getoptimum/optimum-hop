@@ -56,6 +56,9 @@ jobs:
       - name: Run OSV Scanner
         uses: google/osv-scanner-action/osv-scanner-action@9a498708959aeaef5ef730655706c5a1df1edbc2
         with:
+          # `--fail-on-vuln` is not a v2 flag; non-zero exit on any found
+          # vulnerability is the default. `--lockfile=yarn.lock` keeps the
+          # scan scoped to the JS dep tree and skips spurious matches in
+          # docs/ or build output.
           scan-args: |-
             --lockfile=yarn.lock
-            --fail-on-vuln
