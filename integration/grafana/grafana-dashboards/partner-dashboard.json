@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Partner-facing dashboard for Optimum Gateway. All metrics sourced from the gateway /metrics endpoint. Select your gateway from the dropdown.",
+  "description": "Partner-facing dashboard for Optimum Gateway v1.0.2. All metrics sourced from the gateway /metrics endpoint. Select your Prometheus datasource and Network (Hoodi or Mainnet), then your gateway (by gateway_label).",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -38,7 +38,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
       "description": "ON when both CL and mump2p peers are connected to the gateway.",
       "fieldConfig": {
@@ -80,8 +80,8 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 5,
+        "h": 6,
+        "w": 4,
         "x": 0,
         "y": 1
       },
@@ -108,10 +108,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "(max by(gateway_id) (last_over_time(optp2p_gateway_optimum_gateway_cl_peers{gateway_id=\"$gateway\"}[$__rate_interval])) > bool 0) * (max by(gateway_id) (last_over_time(optp2p_gateway_optimum_gateway_opt_peers{gateway_id=\"$gateway\"}[$__rate_interval])) > bool 0)",
+          "expr": "clamp_max((max(last_over_time(mump2p_gateway_cl_peers{gateway_label=\"$gateway\"}[$__rate_interval])) or vector(0)) * (max(last_over_time(mump2p_gateway_mump2p_peers{gateway_label=\"$gateway\"}[$__rate_interval])) or vector(0)), 1)",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
@@ -124,9 +124,175 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
-      "description": "Gateway version, commit, Go version, and public IP.",
+      "description": "cl_health_status. 1 = fork-supported message from CL (libp2p) within last 30s. 0 = silent CL even if cl_peers > 0.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "DEGRADED"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "HEALTHY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 4,
+        "y": 1
+      },
+      "id": 922,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "mump2p_gateway_cl_health_status{gateway_label=\"$gateway\"}",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "CL freshness",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds_prometheus}"
+      },
+      "description": "peers connected to the gateway.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 5,
+        "x": 7,
+        "y": 1
+      },
+      "id": 3,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "mump2p_gateway_cl_peers{gateway_label=\"$gateway\"}",
+          "legendFormat": "CL Peers",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "mump2p_gateway_mump2p_peers{gateway_label=\"$gateway\"}",
+          "hide": false,
+          "legendFormat": "mump2p Peers",
+          "refId": "B"
+        }
+      ],
+      "title": "Peers",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds_prometheus}"
+      },
+      "description": "Gateway type (paired_with), version, commit, and public IP.",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -158,9 +324,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 6,
         "w": 7,
-        "x": 5,
+        "x": 12,
         "y": 1
       },
       "id": 5,
@@ -174,10 +340,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "optp2p_gateway_optimum_gateway_app_build_info{gateway_id=\"$gateway\"}",
+          "expr": "mump2p_gateway_app_build_info{gateway_label=\"$gateway\"}",
           "instant": true,
           "legendFormat": "__auto",
           "range": false,
@@ -190,9 +356,9 @@
           "id": "labelsToFields",
           "options": {
             "keepLabels": [
+              "paired_with",
               "version",
               "commit",
-              "go",
               "public_ip"
             ],
             "mode": "rows"
@@ -204,21 +370,51 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
-      "description": "Latest slot from genesis (2025-03-17 12:10 UTC, 12s slots).",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
-          "mappings": [],
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "orange",
+                  "index": 1,
+                  "text": "disabled"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "enabled"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "text",
+                  "index": 2,
+                  "text": "unknown cluster"
+                }
+              },
+              "type": "special"
+            }
+          ],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "green",
+                "color": "orange",
                 "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
               }
             ]
           }
@@ -226,14 +422,14 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
-        "w": 6,
-        "x": 12,
+        "h": 6,
+        "w": 5,
+        "x": 19,
         "y": 1
       },
-      "id": 11,
+      "id": 7001,
       "options": {
-        "colorMode": "none",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -246,7 +442,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "auto",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -254,25 +450,212 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "floor(vector((time() - 1742213400) / 12))",
+          "expr": "vector(1)",
           "instant": true,
-          "legendFormat": "Slot",
+          "legendFormat": "__auto",
           "range": false,
           "refId": "A"
         }
       ],
-      "title": "Hoodi  slot",
+      "title": "Propagation",
+      "type": "stat",
+      "description": "Propagation of messages (blocks / attestations) from the mump2p network to the libp2p (CL) network. Enabled by default in v1."
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds_prometheus}"
+      },
+      "description": "mump2p_health_status. 1 = fork-supported message from mump2p within last 30s. 0 = mesh connected but no recent traffic.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "DEGRADED"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "HEALTHY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 3,
+        "w": 3,
+        "x": 4,
+        "y": 4
+      },
+      "id": 923,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "mump2p_gateway_mump2p_health_status{gateway_label=\"$gateway\"}",
+          "instant": true,
+          "legendFormat": "__auto",
+          "range": false,
+          "refId": "A"
+        }
+      ],
+      "title": "mump2p freshness",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 900,
+      "panels": [],
+      "title": "Authentication Status (JWT) - Gateway: ${gateway}",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds_prometheus}"
+      },
+      "description": "VALID when a JWT has been minted and exp is in the future. INVALID = no token or expired (gateway cannot auth to billing/peers).",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "INVALID"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "VALID"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 0,
+        "y": 8
+      },
+      "id": 902,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "clamp_max((mump2p_gateway_auth_token_expires_at_seconds{gateway_label=\"$gateway\"} > bool(time())) * (mump2p_gateway_auth_token_expires_at_seconds{gateway_label=\"$gateway\"} > 0), 1)",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Token valid now",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
-      "description": "peers connected to the gateway.",
+      "description": "How long the cached JWT remains valid. steps down, then jumps back up in the chart below = background refresh from billing (POST /api/v1/auth/token).",
       "fieldConfig": {
         "defaults": {
           "color": {
@@ -287,101 +670,28 @@
                 "value": 0
               },
               {
-                "color": "green",
-                "value": 1
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 4,
-        "w": 5,
-        "x": 0,
-        "y": 5
-      },
-      "id": 3,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "area",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "percentChangeColorMode": "standard",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showPercentChange": false,
-        "textMode": "value_and_name",
-        "wideLayout": true
-      },
-      "pluginVersion": "12.3.1",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "optp2p_gateway_optimum_gateway_cl_peers{gateway_id=\"$gateway\"}",
-          "legendFormat": "CL Peers",
-          "range": true,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "optp2p_gateway_optimum_gateway_mump2p_peers{gateway_id=\"$gateway\"}",
-          "hide": false,
-          "instant": false,
-          "legendFormat": "mump2p Peers",
-          "range": true,
-          "refId": "B"
-        }
-      ],
-      "title": "Peers",
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "description": "Current epoch index in Hoodi (32 slots per epoch).",
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
+                "color": "orange",
+                "value": 1800
+              },
               {
                 "color": "green",
-                "value": 0
+                "value": 7200
               }
             ]
-          }
+          },
+          "unit": "dtdhms"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 4,
+        "h": 5,
         "w": 6,
-        "x": 12,
-        "y": 5
+        "x": 6,
+        "y": 8
       },
-      "id": 12,
+      "id": 901,
       "options": {
-        "colorMode": "none",
+        "colorMode": "value",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
@@ -394,7 +704,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "auto",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -402,68 +712,61 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "floor(vector((time() - 1742213400) / (12 * 32)))",
-          "instant": true,
-          "legendFormat": "Epoch",
-          "range": false,
+          "expr": "clamp_min(mump2p_gateway_auth_token_expires_at_seconds{gateway_label=\"$gateway\"} - time(), 0)",
+          "legendFormat": "__auto",
+          "range": true,
           "refId": "A"
         }
       ],
-      "title": "Hoodi epoch",
+      "title": "Time until token expires",
       "type": "stat"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 9
-      },
-      "id": 200,
-      "panels": [],
-      "title": "Gateway Performance (${gateway})",
-      "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
-      "description": "Median block arrival time via mump2p from slot start for this gateway (lower is better). Median over last ~25 slots (5m window), not a single slot.",
+      "description": "Success share over the last $auth_prom_interval (6h). If no mints occurred in that window but the token is still valid, shows 100% (healthy idle). JWT refresh runs every ~3h.",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "fixedColor": "white",
-            "mode": "fixed"
+            "mode": "thresholds"
           },
           "mappings": [],
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "white",
-                "value": null
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 90
+              },
+              {
+                "color": "green",
+                "value": 99
               }
             ]
           },
-          "unit": "ms"
+          "unit": "percent"
         },
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 6,
-        "x": 0,
-        "y": 10
+        "x": 12,
+        "y": 8
       },
-      "id": 203,
+      "id": 903,
       "options": {
         "colorMode": "value",
-        "graphMode": "area",
+        "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto",
         "percentChangeColorMode": "standard",
@@ -475,7 +778,7 @@
           "values": false
         },
         "showPercentChange": false,
-        "textMode": "value_and_name",
+        "textMode": "auto",
         "wideLayout": true
       },
       "pluginVersion": "12.3.1",
@@ -483,164 +786,135 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.5, sum by(le) (rate(optp2p_gateway_optimum_gateway_block_arrival_mump2p_ms_bucket{gateway_id=\"$gateway\"}[5m])))",
-          "instant": true,
-          "legendFormat": "mump2p",
-          "range": false,
-          "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "expr": "",
-          "hide": false,
-          "instant": false,
+          "expr": "(\n  sum(increase(mump2p_gateway_auth_token_mint_total{gateway_label=\"$gateway\"}[$auth_prom_interval])) == 0\n  and mump2p_gateway_auth_token_expires_at_seconds{gateway_label=\"$gateway\"} > time()\n  and mump2p_gateway_auth_token_expires_at_seconds{gateway_label=\"$gateway\"} > 0\n) * 100\nor\n100 * sum(increase(mump2p_gateway_auth_token_mint_total{gateway_label=\"$gateway\", result=\"success\"}[$auth_prom_interval]))\n  / clamp_min(sum(increase(mump2p_gateway_auth_token_mint_total{gateway_label=\"$gateway\"}[$auth_prom_interval])), 1)",
+          "legendFormat": "__auto",
           "range": true,
-          "refId": "B"
+          "refId": "A"
         }
       ],
-      "title": "arrival via mump2p (median)",
+      "title": "Mint success rate",
       "type": "stat"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
-      "description": "Median block arrival time via mump2p from slot start for this gateway over time. Only mump2p is shown (slots where we have a mump2p measurement). Aggregated over 5m.",
+      "description": "Failed mint attempts",
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
+            "mode": "thresholds"
           },
-          "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "Arrival time (ms)",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 15,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "smooth",
-            "lineWidth": 2,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
+          "decimals": 0,
           "mappings": [],
+          "noValue": "0",
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
                 "color": "green",
                 "value": 0
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 3
               }
             ]
           },
-          "unit": "ms"
+          "unit": "short"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "mump2p"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 18,
-        "x": 6,
-        "y": 10
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 8
       },
-      "id": 206,
-      "interval": "30s",
+      "id": 909,
       "options": {
-        "legend": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
           "calcs": [
-            "mean",
             "lastNotNull"
           ],
-          "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
+          "fields": "",
+          "values": false
         },
-        "tooltip": {
-          "hideZeros": false,
-          "mode": "multi",
-          "sort": "none"
-        }
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
       },
       "pluginVersion": "12.3.1",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.5, sum by(le) (rate(optp2p_gateway_optimum_gateway_block_arrival_mump2p_ms_bucket{gateway_id=\"$gateway\"}[$prom_interval])))",
-          "legendFormat": "mump2p",
+          "expr": "sum(increase(mump2p_gateway_auth_token_mint_total{gateway_label=\"$gateway\", result!=\"success\"}[$auth_prom_interval])) or vector(0)",
+          "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "mump2p arrival over time (median)",
-      "type": "timeseries"
+      "title": "Failed mints (last 6h)",
+      "type": "stat"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 100,
+      "panels": [],
+      "title": "Block Arrival Performance",
+      "type": "row"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
-      "description": "Percentage of slots where mump2p saw the block strictly before libp2p for this gateway. Equal timestamps are not counted as accelerated.",
+      "description": "Percentage of blocks first seen via mump2p vs libp2p over the last 5 minutes.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "thresholds"
           },
           "mappings": [],
+          "max": 100,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "text",
+                "color": "yellow",
                 "value": 0
+              },
+              {
+                "color": "green",
+                "value": 60
+              },
+              {
+                "color": "dark-green",
+                "value": 90
               }
             ]
           },
@@ -649,12 +923,12 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 6,
+        "h": 6,
+        "w": 8,
         "x": 0,
-        "y": 18
+        "y": 14
       },
-      "id": 307,
+      "id": 101,
       "options": {
         "colorMode": "value",
         "graphMode": "none",
@@ -677,27 +951,12 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_mump2p_total{gateway_id=\"$gateway\"}[$prom_interval]))\n/\n(\n  sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_mump2p_total{gateway_id=\"$gateway\"}[$prom_interval]))\n  +\n  sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_libp2p_total{gateway_id=\"$gateway\"}[$prom_interval]))\n) * 100",
-          "instant": true,
+          "expr": "100 * sum(rate(mump2p_gateway_blocks_first_seen_mump2p_total{gateway_label=\"$gateway\"}[5m]))\n/\n(\n  sum(rate(mump2p_gateway_blocks_first_seen_mump2p_total{gateway_label=\"$gateway\"}[5m]))\n  +\n  sum(rate(mump2p_gateway_blocks_first_seen_libp2p_total{gateway_label=\"$gateway\"}[5m]))\n)",
           "legendFormat": "mump2p first",
-          "range": false,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_libp2p_total{gateway_id=\"$gateway\"}[$prom_interval]))\n/\n(\n  sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_mump2p_total{gateway_id=\"$gateway\"}[$prom_interval]))\n  +\n  sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_libp2p_total{gateway_id=\"$gateway\"}[$prom_interval]))\n) * 100",
-          "hide": true,
-          "instant": true,
-          "legendFormat": "libp2p first",
-          "range": false,
-          "refId": "B"
         }
       ],
       "title": "Accelerated slots (last 5m)",
@@ -706,9 +965,9 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
+        "uid": "${ds_prometheus}"
       },
-      "description": "Percentage of slots where mump2p was strictly faster than libp2p over time for this gateway. Greener = higher share. Equal timestamps are not accelerated.",
+      "description": "Percentage of slots where mump2p was strictly faster than libp2p over time for this gateway. Greener = higher share.",
       "fieldConfig": {
         "defaults": {
           "custom": {
@@ -723,30 +982,15 @@
           },
           "unit": "percent"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "mump2p first"
-            },
-            "properties": []
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "libp2p first"
-            },
-            "properties": []
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 18,
-        "x": 6,
-        "y": 18
+        "h": 6,
+        "w": 16,
+        "x": 8,
+        "y": 14
       },
-      "id": 304,
+      "id": 105,
       "interval": "30s",
       "options": {
         "calculate": false,
@@ -789,29 +1033,443 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "100 * sum (rate(optp2p_gateway_optimum_gateway_blocks_first_seen_mump2p_total{gateway_id=\"$gateway\"}[5m])) / (sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_mump2p_total{gateway_id=\"$gateway\"}[5m])) + sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_libp2p_total{gateway_id=\"$gateway\"}[5m])))",
+          "expr": "100 * sum(rate(mump2p_gateway_blocks_first_seen_mump2p_total{gateway_label=\"$gateway\"}[5m])) / (sum(rate(mump2p_gateway_blocks_first_seen_mump2p_total{gateway_label=\"$gateway\"}[5m])) + sum(rate(mump2p_gateway_blocks_first_seen_libp2p_total{gateway_label=\"$gateway\"}[5m])))",
           "legendFormat": "mump2p boost",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Accelerated slots over time",
+      "type": "heatmap"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds_prometheus}"
+      },
+      "description": "Median block arrival time via mump2p from slot start for this gateway over time.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "mump2p"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "#73BF69",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 20
+      },
+      "id": 104,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by(le) (rate(mump2p_gateway_block_arrival_mump2p_ms_bucket{gateway_label=\"$gateway\"}[5m])))",
+          "legendFormat": "mump2p",
+          "refId": "A"
+        }
+      ],
+      "title": "mump2p arrival over time (median)",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "id": 300,
+      "panels": [],
+      "title": "Attestation Performance: Gateway Level",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds_prometheus}"
+      },
+      "description": "End-to-end attestation propagation latency across the mump2p network over time. Measures time from sender gateway emit to receiver gateway decode.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "ms",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p50"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 29
+      },
+      "id": 310,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by(le) (rate(mump2p_gateway_attestation_propagation_latency_ms_bucket{gateway_label=\"$gateway\"}[5m])))",
+          "legendFormat": "p50",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by(le) (rate(mump2p_gateway_attestation_propagation_latency_ms_bucket{gateway_label=\"$gateway\"}[5m])))",
+          "hide": false,
+          "legendFormat": "p95",
+          "refId": "B"
+        }
+      ],
+      "title": "Attestation propagation at $gateway",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 36
+      },
+      "id": 507,
+      "panels": [],
+      "title": "Attestation Performance: Fleet Level",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${ds_prometheus}"
+      },
+      "description": "How long it takes for attestations to reach 50% and 95% of the nodes in mump2p once they are injected in the network. ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "ms",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "never",
+            "showValues": false,
+            "spanNulls": true,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "ms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p50"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "green",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "p95"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 37
+      },
+      "id": 506,
+      "options": {
+        "legend": {
+          "calcs": [
+            "mean",
+            "lastNotNull"
+          ],
+          "displayMode": "table",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "multi",
+          "sort": "desc"
+        }
+      },
+      "pluginVersion": "12.3.1",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${ds_prometheus}"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.5, sum by(le) (rate(mump2p_gateway_attestation_propagation_latency_ms_bucket{gateway_cluster_id=~\"$network\"}[5m])))",
+          "legendFormat": "p50",
           "range": true,
           "refId": "A"
         },
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
+            "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "100 * sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_libp2p_total{gateway_id=\"$gateway\"}[5m])) / (sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_mump2p_total{gateway_id=\"$gateway\"}[5m])) + sum(rate(optp2p_gateway_optimum_gateway_blocks_first_seen_libp2p_total{gateway_id=\"$gateway\"}[5m])))",
-          "hide": true,
-          "legendFormat": "libp2p first",
+          "expr": "histogram_quantile(0.95, sum by(le) (rate(mump2p_gateway_attestation_propagation_latency_ms_bucket{gateway_cluster_id=~\"$network\"}[5m])))",
+          "hide": false,
+          "legendFormat": "p95",
           "range": true,
           "refId": "B"
         }
       ],
-      "title": "Accelerated slots over time",
-      "type": "heatmap"
+      "title": "mump2p network attestation propagation",
+      "type": "timeseries"
     }
   ],
   "preload": false,
@@ -820,24 +1478,59 @@
   "tags": [
     "optimum",
     "partner",
-    "v0.0.1-rc11"
+    "v1.0.1"
   ],
   "templating": {
     "list": [
       {
         "current": {},
+        "includeAll": false,
+        "label": "Prometheus",
+        "name": "ds_prometheus",
+        "options": [],
+        "query": "prometheus",
+        "refresh": 1,
+        "regex": "",
+        "type": "datasource",
+        "hide": 0
+      },
+      {
+        "current": {
+          "text": "Hoodi",
+          "value": "optimum_hoodi_.*"
+        },
+        "includeAll": false,
+        "label": "Network",
+        "name": "network",
+        "options": [
+          {
+            "selected": true,
+            "text": "Hoodi",
+            "value": "optimum_hoodi_.*"
+          },
+          {
+            "selected": false,
+            "text": "Mainnet",
+            "value": "optimum_ethereum_mainnet_.*"
+          }
+        ],
+        "query": "Hoodi : optimum_hoodi_.*, Mainnet : optimum_ethereum_mainnet_.*",
+        "type": "custom"
+      },
+      {
+        "current": {},
         "datasource": {
           "type": "prometheus",
-          "uid": "PBFA97CFB590B2093"
+          "uid": "${ds_prometheus}"
         },
-        "definition": "label_values(optp2p_gateway_optimum_gateway_block_arrival_mump2p_ms_bucket, gateway_id)",
+        "definition": "label_values(mump2p_gateway_app_build_info{gateway_cluster_id=~\"$network\", gateway_label=~\".+\"}, gateway_label)",
         "includeAll": false,
         "label": "Gateway",
         "name": "gateway",
         "options": [],
         "query": {
           "qryType": 1,
-          "query": "label_values(optp2p_gateway_optimum_gateway_block_arrival_mump2p_ms_bucket, gateway_id)",
+          "query": "label_values(mump2p_gateway_app_build_info{gateway_cluster_id=~\"$network\", gateway_label=~\".+\"}, gateway_label)",
           "refId": "PrometheusVariableQueryEditor-VariableQuery"
         },
         "refresh": 2,
@@ -847,13 +1540,14 @@
       },
       {
         "current": {
-          "text": "5m",
-          "value": "5m"
+          "text": "6h",
+          "value": "6h"
         },
+        "description": "Prometheus range vector for JWT mint queries (hidden; fixed at 6h).",
         "hide": 2,
-        "label": "Prometheus Interval",
-        "name": "prom_interval",
-        "query": "5m",
+        "label": "Auth rate window",
+        "name": "auth_prom_interval",
+        "query": "6h",
         "skipUrlSync": true,
         "type": "constant"
       }
@@ -865,6 +1559,6 @@
   },
   "timepicker": {},
   "timezone": "browser",
-  "title": "Optimum Gateway - Partner Dashboard",
-  "uid": "partner-gateway-rc11"
+  "title": "Optimum Gateway - Partner Dashboard (v1.0.1)",
+  "uid": "partner-gateway-v1"
 }

@@ -2,15 +2,19 @@
 
 Local development and testing setup for the Optimum Gateway with Ethereum EL/CL clients and monitoring.
 
+Partner install, API keys, and production config: **[Gateway documentation (latest)](https://getoptimum.github.io/optimum-gateway/versions/latest/)**.
+
 ## Prerequisites
 
 * Docker and Docker Compose installed
+* Optimum **API key** (`ogw_live_...`) — set as **`OPT_API_KEY`** in `ethereum/.env` (see [Generate your API key](https://getoptimum.github.io/optimum-gateway/versions/latest/01_quick_start#generate-your-api-key))
 * Ports available: gateway `33212`, `48123`; monitoring `9090`, `3000` (lite/full); CL-specific ports below
 
 ## Setup
 
 ```bash
 cd ethereum
+cp .env.example .env   # if first run; set OPT_API_KEY=ogw_live_...
 make init
 ```
 
@@ -101,7 +105,11 @@ curl -s http://localhost:9596/eth/v1/node/identity | jq -r '.data.p2p_addresses[
 
 Gateway config: `ethereum/config/app_conf.yml` (created from `config/sample.app_conf.yml` on first `make init`).
 
-Image versions and `GATEWAY_PEER` live in `ethereum/.env` (from `.env.example`).
+* **`OPT_API_KEY`** — set in `ethereum/.env`, not in YAML. Required for auth and validator scope.
+* **`gateway_cluster_id`** — must match the cluster assigned during onboarding (sample uses `optimum_hoodi_v0_2` for Hoodi dev).
+* Image versions (`GATEWAY_VERSION`, CL/EL tags) and `GATEWAY_PEER` live in `ethereum/.env` (from `.env.example`).
+
+Recommended CL versions and PeerDAS flags: [Gateway quick start](https://getoptimum.github.io/optimum-gateway/versions/latest/01_quick_start) and [Troubleshooting](https://getoptimum.github.io/optimum-gateway/versions/latest/04_troubleshoot).
 
 ## Monitoring
 
@@ -140,13 +148,16 @@ integration/
 │   ├── .env.example
 │   └── prysm.sh
 └── grafana/
+    ├── docker-compose-grafana.yml
     ├── prometheus/
     ├── grafana-provisioning/
     └── grafana-dashboards/
+        └── partner-dashboard.json   # mump2p_gateway_* metrics (v1.0.2+)
 ```
 
 ## Important Notes
 
+* Set **`OPT_API_KEY`** in `.env` before `make init` — the gateway will not authenticate without it
 * Only one EL profile at a time (`geth` or `nethermind`)
 * Only one CL profile at a time (`prysm`, `teku`, `lighthouse`, `nimbus`, or `lodestar`)
 * `GATEWAY_PEER`, `ADDR`, and `PEER_ID` are set by `make init`

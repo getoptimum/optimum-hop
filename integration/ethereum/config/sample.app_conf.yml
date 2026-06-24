@@ -1,9 +1,9 @@
 log_level: debug
-identity_libp2p_dir: /tmp/libp2p
-identity_optp2p_dir: /tmp/mump2p
+gateway_cluster_id: optimum_hoodi_v0_2
+
 agent_lib_p2p_port: 33212
 agent_opt_p2p_port: 43213
 telemetry_enable: true
 telemetry_port: 48123
-gateway_cluster_id: optimum_hoodi_v0_2
-api_key: your-api-key
+identity_libp2p_dir: /tmp/libp2p
+identity_optp2p_dir: /tmp/mump2p

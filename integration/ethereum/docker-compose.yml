@@ -16,6 +16,8 @@ services:
       - ./config:/app/config  # Config directory (must contain app_conf.yml)
       - ./identity/libp2p:/tmp/libp2p   # Persistent libp2p identity
       - ./identity/mump2p:/tmp/mump2p   # Persistent mump2p identity
+    environment:
+      OPT_API_KEY: ${OPT_API_KEY}
     command: ["-config=/app/config/app_conf.yml"]  # Explicit config path
     networks:
       hop-hoodi-testnet:
