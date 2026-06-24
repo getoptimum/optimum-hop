@@ -386,6 +386,11 @@
     "@eslint/core" "^0.17.0"
     levn "^0.4.1"
 
+"@fontsource-variable/geist-mono@^5.2.8":
+  version "5.2.8"
+  resolved "https://registry.yarnpkg.com/@fontsource-variable/geist-mono/-/geist-mono-5.2.8.tgz#b71fbb9d8332dde974adeba3dbe5180c4ce9e9aa"
+  integrity sha512-KI5bj+hkkRiHttYHmccotUZ80ZuZyai+RwI1d7UId0clkx/jXxlo8qYK8j54WzmpBjtMoEMPyllV7faDcj+6RA==
+
 "@fontsource-variable/geist@^5.2.9":
   version "5.2.9"
   resolved "https://registry.yarnpkg.com/@fontsource-variable/geist/-/geist-5.2.9.tgz#261356515cb97e51bee31991259776b7435f0bd8"

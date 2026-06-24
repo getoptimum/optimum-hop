@@ -1,46 +1,20 @@
 # HOP: The fastest way to experience Optimum
 
-HOP is a **Docker Compose framework** and **test suite** for quickly experimenting with **mumP2P across different networks and use cases**.
+HOP is a **Docker Compose framework** for quickly experimenting with **mump2p** — starting with a pre-wired **Prometheus + Grafana** stack for the Optimum Gateway.
 
-It provides ready-to-use bundles that remove setup overhead and let teams focus on testing, measuring, and visualizing performance.
+**Pick your path and hop on:**
 
-**Pick your path and hop on** — HOP adapts to different ecosystems, giving validators, builders, and teams a frictionless way to evaluate mumP2P.
+* **HOP Lite** — gateway (already running) + monitoring only
+* **HOP Full** — full local EL/CL + gateway + monitoring via [integration](../integration/README.md) (synced from the gateway repo)
 
+## Get started
 
-
-## Quick Navigation
-
-* **[Complete Setup Guide](./docs/)** - Everything you need to get started
-
-
-## What's HOP?
-
-### **HOP Lite** (for validators)
-
-* Gateway + Monitoring only
-* Connect to your existing Ethereum nodes
-* Perfect for production validator setups
-
-### **HOP Full** (for complete testing)
-
-* Full Ethereum node + Gateway + Monitoring  
-* Everything included in one bundle
-* Ideal for builders and ecosystem teams
-
-### **HOP Flex** *(coming soon)*
-
-* Community participation with leaderboards
-* Telemetry + dashboards + incentives
-* Open to all network participants
-
-
-
-## Get Started
+1. Run the **Optimum Gateway** — [Gateway quick start](https://getoptimum.github.io/optimum-gateway/versions/latest/01_quick_start)
+2. Start **Grafana + Prometheus** from this repo:
 
 ```bash
-# Quick start - choose your path
-GATEWAY_ID=yourorg-region-01 docker compose --profile lite up -d     # HOP Lite
-GATEWAY_ID=yourorg-region-01 docker compose --profile full up -d     # HOP Full
+cd integration/grafana
+docker compose -f docker-compose-grafana.yml up -d
 ```
 
-**Ready to hop on?** → [Start here](./docs/)
+**Setup details** → [Complete Setup Guide](./docs/)
