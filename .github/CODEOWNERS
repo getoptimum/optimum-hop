@@ -1,3 +1,24 @@
+# CODEOWNERS — see https://docs.github.com/articles/about-code-owners
+# Order matters: the last matching pattern takes precedence.
+# Enable "Require review from Code Owners" in branch protection to enforce.
+
+# ---------------------------------------------------------------------------
 # Default owners for everything in the repo.
-# These users are requested for review on every pull request.
+# Requested for review on every pull request that doesn't match a stricter
+# rule below.
 * @hpsing @swarna1101
+
+# ---------------------------------------------------------------------------
+# CI / supply-chain — changes here can affect every future build and every
+# deploy. Require a core-dev reviewer in addition to the default owners.
+/.github/                @getoptimum/core-dev
+/.github/workflows/      @getoptimum/core-dev
+/.github/CODEOWNERS      @getoptimum/core-dev
+/.github/dependabot.yml  @getoptimum/core-dev
+
+# ---------------------------------------------------------------------------
+# Repo policy / legal — rarely changes, but should never be modified
+# without an owners-level review.
+/SECURITY.md             @getoptimum/owners
+/LICENSE                 @getoptimum/owners
+/CODE_OF_CONDUCT.md      @getoptimum/owners
