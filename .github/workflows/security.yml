@@ -1,0 +1,52 @@
+name: Security Scan
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  trufflehog:
+    name: TruffleHog Secret Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # v3.93.6 - https://github.com/trufflesecurity/trufflehog/releases/tag/v3.93.6
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@041f07e9df901a1038a528e5525b0226d04dd5ea
+        with:
+          extra_args: --results=verified,unknown
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The action only runs against a base→head diff, so it has nothing to do
+    # on a direct push to main (no previous PR baseline).
+    if: github.event_name == 'pull_request'
+    steps:
+      # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      # v5.0.0 - https://github.com/actions/dependency-review-action/releases/tag/v5.0.0
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: on-failure
