@@ -32,21 +32,22 @@ jobs:
         with:
           extra_args: --results=verified,unknown
 
-  dependency-review:
-    name: Dependency Review
+  osv-scanner:
+    name: OSV Scanner (dependency vulns)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # The action only runs against a base→head diff, so it has nothing to do
-    # on a direct push to main (no previous PR baseline).
-    if: github.event_name == 'pull_request'
     steps:
       # v6.0.2 - https://github.com/actions/checkout/releases/tag/v6.0.2
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
-      # v5.0.0 - https://github.com/actions/dependency-review-action/releases/tag/v5.0.0
-      - name: Review dependency changes
-        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294
+      # v2.3.8 - https://github.com/google/osv-scanner-action/releases/tag/v2.3.8
+      # GitHub's dependency-review-action needs Advanced Security on private
+      # repos. OSV-Scanner (Google) does the same lockfile vuln scan locally
+      # against the OSV.dev database, no Advanced Security required.
+      - name: Run OSV Scanner
+        uses: google/osv-scanner-action@9a498708959aeaef5ef730655706c5a1df1edbc2
         with:
-          fail-on-severity: high
-          comment-summary-in-pr: on-failure
+          scan-args: |-
+            --lockfile=yarn.lock
+            --fail-on-vuln
