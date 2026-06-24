@@ -1,29 +1,46 @@
-<div align="center">
 
-[![Docs](https://github.com/getoptimum/optimum-hop/actions/workflows/docs.yml/badge.svg)](https://github.com/getoptimum/optimum-hop/actions/workflows/docs.yml)
-[![Documentation](https://img.shields.io/badge/docs-getoptimum.github.io%2Foptimum--hop-blue)](https://getoptimum.github.io/optimum-hop/)
 
-[![Gateway image](https://img.shields.io/docker/v/getoptimum/gateway?label=gateway%20image&sort=semver&logo=docker)](https://hub.docker.com/r/getoptimum/gateway)
-[![Docker pulls](https://img.shields.io/docker/pulls/getoptimum/gateway?logo=docker&label=pulls)](https://hub.docker.com/r/getoptimum/gateway)
-[![Built with VitePress](https://img.shields.io/badge/built%20with-VitePress-42b883)](https://vitepress.dev/)
-[![License](https://img.shields.io/github/license/getoptimum/optimum-hop)](./LICENSE)
+[Docs](https://github.com/getoptimum/optimum-hop/actions/workflows/docs.yml)
+[Documentation](https://getoptimum.github.io/optimum-hop/)
+
+[Gateway image](https://hub.docker.com/r/getoptimum/gateway)
+[Docker pulls](https://hub.docker.com/r/getoptimum/gateway)
+[Built with VitePress](https://vitepress.dev/)
+[License](./LICENSE)
 
 # Optimum HOP — The fastest way to experience Optimum
 
-</div>
+
 
 HOP is a **Docker Compose framework** and **test suite** for running Optimum Gateway and monitoring in a few commands.  
 It’s the quickest way to experiment with **mump2p** without manual setup.
 
-> **Security:** see [`SECURITY.md`](SECURITY.md) for how to report vulnerabilities.
+> **Security:** see `[SECURITY.md](SECURITY.md)` for how to report vulnerabilities.
 
-![Optimum HOP overview](public/banner.png)
+Optimum HOP overview
 
 ---
 
 ## Integrations
 
-* Ethereum — see [./integration/README.md](./integration/README.md)
+- Grafana dashboard & monitoring stack — see [./integration/README.md](./integration/README.md)
+- Optimum Gateway setup — [Gateway docs (latest)](https://getoptimum.github.io/optimum-gateway/versions/latest/)
+
+## Repository layout
+
+```text
+optimum-hop/
+├── integration/
+│   ├── README.md
+│   └── grafana/
+│       ├── docker-compose-grafana.yml
+│       ├── prometheus/
+│       ├── grafana-provisioning/
+│       └── grafana-dashboards/
+│           └── partner-dashboard.json
+└── docs/
+    └── index.md
+```
 
 ## Docs site (this repository)
 
@@ -34,8 +51,8 @@ make run-dev    # VitePress dev server; use make build for production build
 
 ## Contributing
 
-Contributions are welcome — see [`CONTRIBUTING.md`](CONTRIBUTING.md) and our
-[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+Contributions are welcome — see `[CONTRIBUTING.md](CONTRIBUTING.md)` and our
+`[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)`.
 
 ## License
 

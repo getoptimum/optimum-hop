@@ -1,17 +1,14 @@
 # HOP: The fastest way to experience Optimum
 
-HOP is a **Docker Compose framework** and **test suite** for quickly experimenting with **mumP2P across different networks and use cases**.
+HOP is a **Docker Compose framework** and **test suite** for quickly experimenting with **mump2p across different networks and use cases**.
 
 It provides ready-to-use bundles that remove setup overhead and let teams focus on testing, measuring, and visualizing performance.
 
-**Pick your path and hop on** — HOP adapts to different ecosystems, giving validators, builders, and teams a frictionless way to evaluate mumP2P.
-
-
+**Pick your path and hop on** — HOP adapts to different ecosystems, giving validators, builders, and teams a frictionless way to evaluate mump2p.
 
 ## Quick Navigation
 
-* **[Complete Setup Guide](./docs/)** - Everything you need to get started
-
+* **[Complete Setup Guide](./docs/)** — Everything you need to get started
 
 ## What's HOP?
 
@@ -23,7 +20,7 @@ It provides ready-to-use bundles that remove setup overhead and let teams focus 
 
 ### **HOP Full** (for complete testing)
 
-* Full Ethereum node + Gateway + Monitoring  
+* Full Ethereum node + Gateway + Monitoring
 * Everything included in one bundle
 * Ideal for builders and ecosystem teams
 
@@ -33,14 +30,13 @@ It provides ready-to-use bundles that remove setup overhead and let teams focus 
 * Telemetry + dashboards + incentives
 * Open to all network participants
 
-
-
 ## Get Started
 
+Run the **Optimum Gateway** using the [Gateway quick start](https://getoptimum.github.io/optimum-gateway/versions/latest/01_quick_start), then bring up the **Grafana stack** from this repo:
+
 ```bash
-# Quick start - choose your path
-GATEWAY_ID=yourorg-region-01 docker compose --profile lite up -d     # HOP Lite
-GATEWAY_ID=yourorg-region-01 docker compose --profile full up -d     # HOP Full
+cd integration/grafana
+docker compose -f docker-compose-grafana.yml up -d
 ```
 
 **Ready to hop on?** → [Start here](./docs/)
