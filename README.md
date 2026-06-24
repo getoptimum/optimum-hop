@@ -1,11 +1,5 @@
 <div align="center">
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark.png">
-  <source media="(prefers-color-scheme: light)" srcset="public/logo-light.png">
-  <img alt="Optimum HOP" src="public/logo-light.png" width="420">
-</picture>
-
 [![Docs](https://github.com/getoptimum/optimum-hop/actions/workflows/docs.yml/badge.svg)](https://github.com/getoptimum/optimum-hop/actions/workflows/docs.yml)
 [![Documentation](https://img.shields.io/badge/docs-getoptimum.github.io%2Foptimum--hop-blue)](https://getoptimum.github.io/optimum-hop/)
 
