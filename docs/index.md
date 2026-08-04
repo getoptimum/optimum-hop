@@ -57,4 +57,5 @@ Copy **`integration/grafana/grafana-dashboards/partner-dashboard.json`** into yo
 ## Further reading
 
 * [Integration README](../integration/README.md) — optional full local EL/CL + gateway stack (synced from the gateway repo)
+* [Obol CDVN overlay](../integration/obol/) — opt-in Optimum Gateway on an Obol Charon DV node
 * [Optimum Gateway documentation](https://getoptimum.github.io/optimum-gateway/versions/latest/)

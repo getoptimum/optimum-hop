@@ -15,9 +15,12 @@ title: 'HOP Docs',
   markdown: {
     math: true,
   },
-  srcExclude: [
-    "README.md"
-  ],
+  srcExclude: ["./README.md"],
+  // Serve integration READMEs at clean directory URLs.
+  rewrites: {
+    "integration/README.md": "integration/index.md",
+    "integration/obol/README.md": "integration/obol/index.md",
+  },
   sitemap: {
     hostname: "https://docs.getoptimum.xyz",
   },
@@ -112,6 +115,10 @@ function sidebarHome() {
         {
           text: "Complete Setup Guide",
           link: "/docs/",
+        },
+        {
+          text: "Obol CDVN overlay",
+          link: "/integration/obol/",
         },
       ],
     },
