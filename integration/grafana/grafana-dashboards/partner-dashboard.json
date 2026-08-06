@@ -15,7 +15,7 @@
       }
     ]
   },
-  "description": "Partner-facing dashboard for Optimum Gateway v1.0.2. All metrics sourced from the gateway /metrics endpoint. Select your Prometheus datasource and Network (Hoodi or Mainnet), then your gateway (by gateway_label).",
+  "description": "Partner-facing dashboard for Optimum Gateway v1.1.1. All metrics sourced from the gateway /metrics endpoint. Select your Prometheus datasource and Network (Hoodi or Mainnet), then your gateway (by gateway_label).",
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 1,
@@ -453,16 +453,16 @@
             "uid": "${ds_prometheus}"
           },
           "editorMode": "code",
-          "expr": "vector(1)",
+          "expr": "mump2p_gateway_propagation_state{gateway_label=\"$gateway\"}",
           "instant": true,
-          "legendFormat": "__auto",
+          "legendFormat": "propagation",
           "range": false,
           "refId": "A"
         }
       ],
       "title": "Propagation",
       "type": "stat",
-      "description": "Propagation of messages (blocks / attestations) from the mump2p network to the libp2p (CL) network. Enabled by default in v1."
+      "description": "Whether this gateway is propagating mump2p messages to CL (from mump2p_gateway_propagation_state: 1=enabled, 0=disabled via Optimum dynamic config)."
     },
     {
       "datasource": {
